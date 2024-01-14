@@ -13,5 +13,7 @@ U nastavku su navedene glavne stavke koje je u radu potrebno objasniti. Lista st
 
 ## Autori:
 Mentor: dr Milena Vujošević Janičić
+
 Student: Petar Tešić 1064/2022
+
 Master rad je urađen u saradnji sa kompanijom SYRMIA.
