@@ -1,6 +1,8 @@
 # Prepoznavanje CRC algoritma i zamena optimizovanom verzijom za potrebe RISCV arhitekture u okviru kompajlerske infrastrukture LLVM
 Ovaj repozitorijum će sadržati implementaciju i objašnjene master rada na temu "Prepoznavanje CRC algoritma i zamena optimizovanom verzijom za potrebe RISCV arhitekture u okviru kompajlerske infrastrukture LLVM". 
+
 Master rad predstavlja poslednju stavku koju je potrebno ispuniti kako bi se uspešno završile master studije. 
+
 Master rad koji će u ovom repozitorijumu biti predstavljen je urađen za potrebe master studija na Matematičkom fakultetu Univerziteta u Beogradu.
 
 ## Sadržaj:
