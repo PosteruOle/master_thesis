@@ -16,7 +16,14 @@ Njegovom primenom se može utvrditi da li su bitovi poruke poslate putem mreže 
 ## RISC-V arhitektura
 
 ## Implementacija 1
-
+Prva implementacija je u potpunosti sprovedena na IR-nivou. To znači da je program napisan u programskim jezicima C ili C++ preveden prednjim delom LLVM kompilatora u fajl sa .ll ekstenzijom
+koji sadrži među-reprezentaciju početnog programa i da je potom isti .ll fajl izmenjen tako da sadrži optimizovanu verziju CRC algoritma koja se potom može proslediti srednjem i zadnjem delu 
+kompilatora kako bi se dobio objektni ili izvršivi fajl koji sadrži optimozovanu verziju CRC algoritma. 
+Ova implementacija počiva na prepoznavanju jedne varijante CRC algoritma, zatim uklanjanju odnosno brisanju prepoznatih instrukcija neoptimizovane verzije CRC algoritma i na kraju generisanju 
+novih IR instrukcija koje pripadaju optimozovanoj verziji algoritma. Time se od jedne verzije .ll fajla dobija novi, takođe ispravan, .ll fajl. 
 
 ## Implementacija 2
+Druga implementacija počiva na prepoznavanju jedne neoptimizovane varijante CRC algoritma, zatim uklanjanju prepoznatih istrukcija, potom kreiranju poziva intrinzičke funkcije nad istim argumentima
+nad kojima bi neoptimizovani CRC algoritam bio sproveden i na kraju pred sam kraj prevođenje programa zamenom intrinzičke funkcije sekvencom mašinskih instrukcija koje pripadaju optimizovanoj varijanti
+CRC algoritma.
 
