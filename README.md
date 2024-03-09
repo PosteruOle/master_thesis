@@ -18,7 +18,7 @@ Problem koji u ovom radu rešavamo je, kao što i sam naslov kaže, prepoznavanj
 Ukoliko na kratko razmislimo kako bismo to bilo koji algoritam mogli da prepoznamo dolazimo do zaključka da je to jedino moguće uraditi sprovođenjem čitavog algoritma i upoređivanjem da li se u svakom od koraka izvršava ona naredba ili instrukcija koju očekujemo i proveravanjem da li svaka od promenljivih koje figurišu u algoritmu u svakom trenutku ima vrednost koju mi očekujemo da će imati. Na kraju ovakvog postupka, ukoliko ni u jednoj od spomenutih provera nije bilo razlike između očekivanih i dobijenih rezultata, možemo slobodno zaključiti da smo uspešno prepoznali algoritam od našeg interesa.
 
 Neka je u nastavku naveden sadržaj fajla **crc_unoptimized_version.c**:
-'''
+```
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -49,7 +49,7 @@ int main(){
 
   return 0; 
 }
-'''
+```
 
 ## Autori:
 Mentor: dr Milena Vujošević Janičić
