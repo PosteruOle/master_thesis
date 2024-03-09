@@ -82,6 +82,10 @@ int main(){
   return 0; 
 }
 ```
+Kao što verovatno već pretpostavljate, želimo da prepoznamo verziju CRC algoritma iz fajla **crc_unoptimized_version.c** i da je potom zamenimo verzijom istog algoritma iz fajla **crc_optimized_version.c**. <br>
+Međutim, ne želimo da menjamo sadržaj **crc_unoptimized_version.c** fajla, već želimo da nad njim započnemo proces kompilacije tokom koga će kompilator koji budemo koristili (LLVM u našem slučaju) ustanoviti da se radi o neoptimozovanoj implementaciji i potom umesto nje iskoristiti optimizovanu. <br> <br>
+**Kako ćemo tako nešto postići?** <br>
+Da bismo odgovorili na ovo pitanje potrebno je da se prvo upoznamo sa različitim nivoima apstrakcije i reprezentacije koda koji se prevodi LLVM kompilatorom i uopšte načinom prevođenje programa korišćenjem LLVM kopilatora.  
 
 
 ## Kompajlerska infrastruktura LLVM
