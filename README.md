@@ -14,8 +14,9 @@ U nastavku su navedene glavne stavke koje je u radu potrebno objasniti. Lista st
 - Algoritam CRC (Cyclic Redundancy Check)
 
 ## Postavka problema
-Problem koji u ovom radu rešavamo je, kao što i sam naslov kaže, prepoznavanje neoptimizovane verzije CRC algoritma, a potom, po uspešnom prepoznavanju i zamena prepoznate (opet neoptimizovane= verzije optimizovanom verzijom. <br>
-Ukoliko na kratko razmislimo kako bismo to bilo koji algoritam mogli da prepoznamo dolazimo do zaključka da je to jedino moguće uraditi sprovođenjem čitavog algoritma i upoređivanjem da li se u svakom od koraka izvršava ona naredba ili instrukcija koju očekujemo i proveravanjem da li svaka od promenljivih koje figurišu u algoritmu u svakom trenutku ima vrednost koju mi očekujemo da će imati. Na kraju ovakvog postupka, ukoliko ni u jednoj od spomenutih provera nije bilo razlike između očekivanih i dobijenih rezultata, možemo slobodno zaključiti da smo uspešno prepoznali algoritam od našeg interesa.
+Problem koji u ovom radu rešavamo je, kao što i sam naslov kaže, prepoznavanje neoptimizovane verzije CRC algoritma, a potom, po uspešnom prepoznavanju i zamena prepoznate (opet neoptimizovane) verzije optimizovanom verzijom. <br>
+Ukoliko na kratko razmislimo kako bismo to bilo koji algoritam mogli da prepoznamo dolazimo do zaključka da je to jedino moguće uraditi sprovođenjem čitavog algoritma i upoređivanjem da li se u svakom od koraka izvršava ona naredba ili instrukcija koju očekujemo i proveravanjem da li svaka od promenljivih koje figurišu u algoritmu u svakom trenutku ima vrednost koju mi očekujemo da će imati. <br> 
+Na kraju ovakvog postupka, ukoliko ni u jednoj od spomenutih provera nije bilo razlike između očekivanih i dobijenih rezultata, možemo slobodno zaključiti da smo uspešno prepoznali algoritam od našeg interesa.
 
 Neka je u nastavku naveden sadržaj fajla **crc_unoptimized_version.c** (fajla koji sadrži neoptimizovanu verziju CRC algoritma):
 ```
@@ -81,6 +82,25 @@ int main(){
   return 0; 
 }
 ```
+
+
+## Kompajlerska infrastruktura LLVM
+Projekat LLVM započet je 2000. godine na Univerzitetu Ilinois od strane Krisa
+Latnera. Projektu se ubrzo pridružio i njegov mentor Vikram Adve. Cilj projekta
+je bio proučavanje tehnika kompiliranja u SSA obliku (eng. Static Single Assign-
+ment) koje podržavaju statičku i dinamičku kompilaciju proizvoljnih programskih
+jezika. Inicijalno, naziv LLVM je bio akronim za „virtuelna mašina niskog nivoa”
+(eng. Low Level Virtual Machine). Akronim se više ne koristi, ali je ime projekta
+ostalo nepromenjeno. Danas, projekat sadrži veliki broj biblioteka i alata koji se
+koriste u komercijalne svrhe i u projektima otvorenog koda. Svaki deo projekta je dizajniran 
+kao biblioteka tako da se može ponovo upotrebiti za implementiranje drugih
+alata. Celokupan izvorni kôd je javno dostupan na servisu GitHub. Velika zajednica se formirala što je znatno doprinelo
+njegovoj popularnosti. Mnoge firme koriste svoje verzije kompilatora LLVM bilo za
+podršku neke arhitekture ili kao osnovu za novi programski jezik.
+
+## Algoritam CRC (Cyclic Redundancy Check)
+
+## Zaključak:
 
 ## Autori:
 Mentor: dr Milena Vujošević Janičić
