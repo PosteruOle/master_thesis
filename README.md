@@ -109,6 +109,6 @@ podršku neke arhitekture ili kao osnovu za novi programski jezik.
 ## Autori:
 Mentor: dr Milena Vujošević Janičić
 
-Student: Petar Tešić 1064/2022
+Student: Petar Tešić 1064/2022 5I
 
 Master rad je urađen u saradnji sa kompanijom SYRMIA.
