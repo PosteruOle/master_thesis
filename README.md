@@ -89,6 +89,17 @@ Međutim, ne želimo da menjamo sadržaj **crc_unoptimized_version.c** fajla, ve
 Da bismo odgovorili na ovo pitanje potrebno je da se prvo upoznamo sa različitim nivoima apstrakcije i reprezentacije koda koji se prevodi LLVM kompilatorom i uopšte načinom prevođenje programa korišćenjem LLVM kopilatora.  
 
 # Faze prevođenja programa
+Proces prevodjenja programa je ključni korak u transformaciji izvornog koda napisanog na programskom jeziku visokog nivoa u oblik koji je računaru razumljiv. 
+Postoje dva osnovna pristupa prevođenju programa i to su kompilacija i interpretacija.
+
+Kompilacija podrazumeva prevođenje celog izvornog koda programa u niz instrukcija koje računar može direktno da izvrši. 
+Ovaj proces se obično sastoji iz nekoliko faza. Prva faza je faza leksičke analizi, u kojoj 
+se izvorni kod razlaže na niz tokena kao što su ključne reči, operatori i identifikatori. Zatim sledi faza sintaksne analize, gde se proverava ispravnost sintakse izvornog koda prema gramatici jezika. Nakon toga dolazi faza semantičke analize, gde se proveravaju semantička pravila jezika i proizvode se apstraktna sintaksna stabla. U sledećoj fazi se generiše međukod koji je specifičan za ciljnu arhitekturu. Na kraju, međukod se prevodi u mašinski kod odgovarajuće ciljne arhitekture.
+
+Interpretacija, s druge strane, podrazumeva izvršavanje izvornog koda redom, liniju po liniju, koristeći interpreter. Tokom interpretacije, izvorni kod se ne prevodi unapred u mašinski kod, već se svaka instrukcija izvršava u trenutku kada se naiđe na nju. Ovo omogućava dinamičko izvršavanje koda, ali često može rezultirati sporijim izvršavanjem u poređenju sa kompilacijom.
+
+Iako kompilacija i interpretacija imaju različite faze i pristupe, oba procesa imaju isti cilj: da prevedu izvorni kod programa u oblik koji računar može razumeti i izvršiti. Izbor između kompilacije i interpretacije zavisi od specifičnih zahteva i karakteristika programa, kao i preferencija programera.
+
 
 ## Kompajlerska infrastruktura LLVM
 Projekat LLVM započet je 2000. godine na Univerzitetu Ilinois od strane Krisa
@@ -114,6 +125,13 @@ kako bi od njega kreirao optimizovanu među-reprezentaciju našeg početnog prog
 se na samom kraju LLVM-ovog pipeline-a dobio ili asemblerski kod ili objektni fajl.
 
 ## Algoritam CRC (Cyclic Redundancy Check)
+CRC (Cyclic Redundancy Check) je algoritam koji se često koristi za proveru integriteta podataka u digitalnim komunikacijama. Njegova bitnost proizilazi iz njegove sposobnosti otkrivanja grešaka koje se mogu desiti prilikom prenosa podataka putem različitih medija, kao što su žičane veze, bežične mreže ili optički kablovi.
+Аlgoritam se često koristi u računarskim mrežama, komunikacionim sistemima, kao i u memorijskim uređajima.
+Princip rada CRC algoritma se zasniva na generisanju kratkog kontrolnog broja koji se dodaje na kraj porukCRC (Cyclic Redundancy Check) je algoritam koji se često koristi za proveru integriteta podataka u digitalnim komunikacijama. Njegova bitnost proizilazi iz njegove sposobnosti otkrivanja grešaka koje se mogu desiti prilikom prenosa podataka putem različitih medija, kao što su žičane veze, bežične mreže ili optički kablovi.
+
+Ovaj algoritam se često koristi u računarskim mrežama, komunikacionim sistemima, kao i u memorijskim uređajima. On omogućava efikasno otkrivanje grešaka koje se javljaju usled slučajnih promena u podacima tokom prenosa.
+
+Princip rada CRC algoritma se zasniva na generisanju kratkog kontrolnog broja koji se dodaje na kraj poruke pre slanja. Ovaj kontrolni broj se računa na osnovu samih podataka poruke, i njegova dužina zavisi od izabrane CRC funkcije.e pre slanja. Ovaj kontrolni broj se računa na osnovu samih podataka poruke, i njegova dužina zavisi od izabrane CRC funkcije.
 
 ## Zaključak:
 
