@@ -1,5 +1,10 @@
 # Prepoznavanje CRC algoritma i zamena optimizovanom verzijom za RISC-V artitekturu u okviru kompajlerske infrastrukture LLVM
 
+Kandidati za naslov:
+- Prepoznavanje CRC algoritma i zamena optimizovanom verzijom za RISC-V artitekturu u okviru kompajlerske infrastrukture LLVM
+- Prepoznavanje CRC algoritma za potrebe RISC-V artitekture a u okviru kompajlerske infrastrukture LLVM
+- Semantička detekcija CRC algoritma za potrebe RISC-V artitekture a u okviru kompajlerske infrastrukture LLVM
+- Semantička detekcija algoritma za generisanje kontrolne sume za potrebe RISC-V artitekture a u okviru kompajlerske infrastrukture LLVM
 
 ## LLVM infrastruktura
 LLVM je veoma moćan kompilator koji predstavlja ozbiljnog konkurenta GCC kompilatoru.

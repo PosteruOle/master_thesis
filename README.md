@@ -7,6 +7,7 @@ Master rad koji će u ovom repozitorijumu biti predstavljen je urađen za potreb
 
 ## Sadržaj:
 U nastavku su navedene glavne stavke koje je u radu potrebno objasniti. Lista stavki će se potencijalno menjati:
+- Postavka problema
 - Faze prevođenja programa
 - Delovi kompilatora (frontend, middleend, backend)
 - Kompajlerska infrastruktura LLVM
@@ -87,22 +88,50 @@ Međutim, ne želimo da menjamo sadržaj **crc_unoptimized_version.c** fajla, ve
 **Kako ćemo tako nešto postići?** <br>
 Da bismo odgovorili na ovo pitanje potrebno je da se prvo upoznamo sa različitim nivoima apstrakcije i reprezentacije koda koji se prevodi LLVM kompilatorom i uopšte načinom prevođenje programa korišćenjem LLVM kopilatora.  
 
+# Faze prevođenja programa
+Proces prevodjenja programa je ključni korak u transformaciji izvornog koda napisanog na programskom jeziku visokog nivoa u oblik koji je računaru razumljiv. 
+Postoje dva osnovna pristupa prevođenju programa i to su kompilacija i interpretacija.
+
+Kompilacija podrazumeva prevođenje celog izvornog koda programa u niz instrukcija koje računar može direktno da izvrši. 
+Ovaj proces se obično sastoji iz nekoliko faza. Prva faza je faza leksičke analizi, u kojoj 
+se izvorni kod razlaže na niz tokena kao što su ključne reči, operatori i identifikatori. Zatim sledi faza sintaksne analize, gde se proverava ispravnost sintakse izvornog koda prema gramatici jezika. Nakon toga dolazi faza semantičke analize, gde se proveravaju semantička pravila jezika i proizvode se apstraktna sintaksna stabla. U sledećoj fazi se generiše međukod koji je specifičan za ciljnu arhitekturu. Na kraju, međukod se prevodi u mašinski kod odgovarajuće ciljne arhitekture.
+
+Interpretacija, s druge strane, podrazumeva izvršavanje izvornog koda redom, liniju po liniju, koristeći interpreter. Tokom interpretacije, izvorni kod se ne prevodi unapred u mašinski kod, već se svaka instrukcija izvršava u trenutku kada se naiđe na nju. Ovo omogućava dinamičko izvršavanje koda, ali često može rezultirati sporijim izvršavanjem u poređenju sa kompilacijom.
+
+Iako kompilacija i interpretacija imaju različite faze i pristupe, oba procesa imaju isti cilj: da prevedu izvorni kod programa u oblik koji računar može razumeti i izvršiti. Izbor između kompilacije i interpretacije zavisi od specifičnih zahteva i karakteristika programa, kao i preferencija programera.
+
 
 ## Kompajlerska infrastruktura LLVM
 Projekat LLVM započet je 2000. godine na Univerzitetu Ilinois od strane Krisa
-Latnera. Projektu se ubrzo pridružio i njegov mentor Vikram Adve. Cilj projekta
-je bio proučavanje tehnika kompiliranja u SSA obliku (eng. Static Single Assign-
+Latnera. Cilj projekta je bio proučavanje tehnika kompiliranja u SSA obliku (eng. Static Single Assign-
 ment) koje podržavaju statičku i dinamičku kompilaciju proizvoljnih programskih
-jezika. Inicijalno, naziv LLVM je bio akronim za „virtuelna mašina niskog nivoa”
-(eng. Low Level Virtual Machine). Akronim se više ne koristi, ali je ime projekta
+jezika. Naziv LLVM je predstavljao akronim za „virtuelna mašina niskog nivoa”
+(eng. Low Level Virtual Machine). Međutim, isti akronim se više ne koristi, ali je ime projekta
 ostalo nepromenjeno. Danas, projekat sadrži veliki broj biblioteka i alata koji se
-koriste u komercijalne svrhe i u projektima otvorenog koda. Svaki deo projekta je dizajniran 
+koriste kako u komercijalne svrhe tako i u svrhe razvoja projekata otvorenog koda. Svaki deo projekta je dizajniran 
 kao biblioteka tako da se može ponovo upotrebiti za implementiranje drugih
-alata. Celokupan izvorni kôd je javno dostupan na servisu GitHub. Velika zajednica se formirala što je znatno doprinelo
-njegovoj popularnosti. Mnoge firme koriste svoje verzije kompilatora LLVM bilo za
-podršku neke arhitekture ili kao osnovu za novi programski jezik.
+alata. Celokupan izvorni kôd je javno dostupan na servisu GitHub i oko njega je formirana velika zajednica ljudi koji 
+rade na različitim delovima LLVM i svakodnevno ga unapređuju. Veliki broj kompanija koristi svoje verzije kompilatora 
+LLVM bilo u celosti bilo samo neke njegove delove (prednji, srednji ili zadnji deo kimpilatora) za podršku neke 
+arhitekture ili kao osnovu za novi programski jezik.
+
+### Proces prevođenja programa u okviru kompajlera LLVM
+Ponovimo još jednom, kao i većina drugih kompilatora, i LLVM se sastoji od tri bitna dela: prednjeg, srednjeg i zadnjeg dela.
+Za svaki deo kompilatora je odgovoran različiti alat. 
+Za prednji deo LLVM-a odgovoran je alat Clang, za srednji deo LLVM-a odgovaran je alat opt, a za poslednji odgovoran je alat llc.
+Prevođenje programa napisanog u programskom jeziku C ili C++ kompajlerom LLVM počinje tako što se program prvo prosledi Clang-u, koji od njega formira fajl sa ekstenzijom .ll
+u kome se nalazi među-reprezentacija (intermediate representation) početnog programa. Taj fajl se potom prosleđuje alatu opt koji nad istim vrši veliki broj analiza i optimizacija
+kako bi od njega kreirao optimizovanu među-reprezentaciju našeg početnog programa. Izlaz opt alata se na kraju prosleđuje alatu llc koji nad njim vrši određene trasnformacije kako bi 
+se na samom kraju LLVM-ovog pipeline-a dobio ili asemblerski kod ili objektni fajl.
 
 ## Algoritam CRC (Cyclic Redundancy Check)
+CRC (Cyclic Redundancy Check) je algoritam koji se često koristi za proveru integriteta podataka u digitalnim komunikacijama. Njegova bitnost proizilazi iz njegove sposobnosti otkrivanja grešaka koje se mogu desiti prilikom prenosa podataka putem različitih medija, kao što su žičane veze, bežične mreže ili optički kablovi.
+Аlgoritam se često koristi u računarskim mrežama, komunikacionim sistemima, kao i u memorijskim uređajima.
+Princip rada CRC algoritma se zasniva na generisanju kratkog kontrolnog broja koji se dodaje na kraj porukCRC (Cyclic Redundancy Check) je algoritam koji se često koristi za proveru integriteta podataka u digitalnim komunikacijama. Njegova bitnost proizilazi iz njegove sposobnosti otkrivanja grešaka koje se mogu desiti prilikom prenosa podataka putem različitih medija, kao što su žičane veze, bežične mreže ili optički kablovi.
+
+Ovaj algoritam se često koristi u računarskim mrežama, komunikacionim sistemima, kao i u memorijskim uređajima. On omogućava efikasno otkrivanje grešaka koje se javljaju usled slučajnih promena u podacima tokom prenosa.
+
+Princip rada CRC algoritma se zasniva na generisanju kratkog kontrolnog broja koji se dodaje na kraj poruke pre slanja. Ovaj kontrolni broj se računa na osnovu samih podataka poruke, i njegova dužina zavisi od izabrane CRC funkcije.e pre slanja. Ovaj kontrolni broj se računa na osnovu samih podataka poruke, i njegova dužina zavisi od izabrane CRC funkcije.
 
 ## Zaključak:
 
