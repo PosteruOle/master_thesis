@@ -7,12 +7,16 @@ Master rad koji će u ovom repozitorijumu biti predstavljen je urađen za potreb
 
 ## Sadržaj:
 U nastavku su navedene glavne stavke koje je u radu potrebno objasniti. Lista stavki će se potencijalno menjati:
-- Postavka problema
+- Uvod
 - Faze prevođenja programa
-- Delovi kompilatora (frontend, middleend, backend)
+- Bitni delovi kompilatora (frontend, middle-end, backend)
 - Kompajlerska infrastruktura LLVM
+- LLVM međureprezentacija
+- Algoritam CRC (Cyclic Redundancy Check) i problem njegovog prepoznavanja
 - Arhitektura RISCV
-- Algoritam CRC (Cyclic Redundancy Check)
+- Implementacija rešenja
+- Rezultati implementacije
+- Zaključak
 
 ## Postavka problema
 Problem koji u ovom radu rešavamo je, kao što i sam naslov kaže, prepoznavanje neoptimizovane verzije CRC algoritma, a potom, po uspešnom prepoznavanju i zamena prepoznate (opet neoptimizovane) verzije optimizovanom verzijom. <br>
