@@ -6,6 +6,9 @@ Kandidati za naslov:
 - Semantička detekcija CRC algoritma za potrebe RISC-V artitekture a u okviru kompajlerske infrastrukture LLVM
 - Semantička detekcija algoritma za generisanje kontrolne sume za potrebe RISC-V artitekture a u okviru kompajlerske infrastrukture LLVM
 
+Odabran naslov:
+- Automatska detekcija i optimizacije algoritma CRC u okviru kompajlerske infrastrukture LLVM
+
 ## LLVM infrastruktura
 LLVM je veoma moćan kompilator koji predstavlja ozbiljnog konkurenta GCC kompilatoru.
 Svaki kompilator se sastoji od tri dela: frontend-a, middleend-a i backend-a. Kao ulaz kompilatoru se prosleđuje program napisan na višem programskom jeziku, 
