@@ -15,11 +15,16 @@ unsigned short crcu8_optimized(unsigned char data, unsigned short _crc)  {
 }
 
 
-int main(){
+int main(int argc, char **argv){
 
-  unsigned char data='m';
-  //unsigned short crc=40261;
-  unsigned short crc=1234;
+  if(argc!=3){
+    fprintf(stderr, "Not enough command line arguments!\n");
+    exit(EXIT_FAILURE);
+  }
+
+  unsigned char data=(unsigned char)atoi(argv[1]);
+  unsigned short crc=(unsigned short)atoi(argv[2]);
+  
   unsigned short report=crcu8_optimized(data, crc);
   printf("report = %u\n", report);
    

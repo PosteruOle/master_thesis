@@ -20,12 +20,16 @@ unsigned short crcu8(unsigned char data, unsigned short crc) {
     return crc;
 }
 
-int main(){
-  
-  //printf("sizeof(char) = %lu\n", sizeof(char));
-  //printf("sizeof(short) = %lu\n", sizeof(short));
-  unsigned char data=144;
-  unsigned short crc=12;
+int main(int argc, char **argv){
+
+  if(argc!=3){
+    fprintf(stderr, "Not enough command line arguments!\n");
+    exit(EXIT_FAILURE);
+  }
+
+  unsigned char data=(unsigned char)atoi(argv[1]);
+  unsigned short crc=(unsigned short)atoi(argv[2]);
+
   unsigned short report=crcu8(data, crc);
   printf("report = %u\n", report);
 
