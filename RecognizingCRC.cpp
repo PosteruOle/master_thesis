@@ -39,11 +39,11 @@ static cl::opt<bool> CheckForOptimizedCRC("check-crc-opt", cl::init(false), cl::
 
 // User defined option that can bi passed to opt for running IR level CRC optimization
 static cl::opt<bool> UseNaiveCRCOptimization("crc-opt", cl::init(false), cl::Hidden, 
-                              cl::desc("running IR level optimization for CRC algorithm"));
+                              cl::desc("running IR level CRC algorithm optimization"));
 
 // User defined option that can bi passed to opt for running CRC optimization with intrinsic functions!
 static cl::opt<bool> UseIntrinsicsCRCOptimization("crc-opt-intrinsic", cl::init(false), cl::Hidden, 
-                              cl::desc("runnign optimization with intrinsic function usage fot CRC algorithm"));
+                              cl::desc("running CRC algorithm optimization with intrinsic function usage"));
 
 static bool checkForOptimizedCRCInstructions(Instruction &I){
   // TO-DO
@@ -65,67 +65,84 @@ static void printGeneratedIRInstructions(Function *F){
 }
 
 static bool recognizingUnoptimizedCRCInstructions(Instruction &I){
+  if(I.getFunction()->getName()=="main"){
+    return false;
+  }
+  
   ReturnInst *RIfinal = dyn_cast<ReturnInst>(&I);
   Value *help1;
   Value *help2;
   bool flag;
-
-  if (!RIfinal)
+  // Check for instruction: ret i16 %57
+  if (!RIfinal && match(RIfinal, m_Load(m_Value(help1))))
     return false;
 
   LoadInst *LIfinal = dyn_cast<LoadInst>(RIfinal->getPrevNode());
   LoadInst *LI = dyn_cast<LoadInst>(RIfinal->getPrevNode());
+  IRBuilder<> Builder(LIfinal);
+  // Check for instruction: %57 = load i16, i16* %4, align 2
   if (!LIfinal)
     return false;
 
   BasicBlock *BB = dyn_cast<BasicBlock>(LI->getParent()->getPrevNode());
   BranchInst *BI = dyn_cast<BranchInst>(&BB->back());
-  if (!BI)
+  // Check for instruction: br label %8, !llvm.loop !6
+  if (!BI && BI->isUnconditional())
     return false;
 
   StoreInst *SI = dyn_cast<StoreInst>(BI->getPrevNode());
-  if (!SI)
+  // Check for instruction: store i8 %55, i8* %5, align 1
+  if (!SI && match(SI, m_Store(m_Add(m_Value(help1), m_SpecificInt(1)), m_Value(help2))))
     return false;
 
   Instruction *II = dyn_cast<Instruction>(SI->getPrevNode());
   if (!II)
     return false;
 
+  // Check for instruction: %55 = add i8 %54, 1
   if (!match(II, m_Add(m_Load(m_Value(help1)), m_SpecificInt(1))))
     return false;
 
   LI = dyn_cast<LoadInst>(II->getPrevNode());
+  // Check for instruction: %54 = load i8, i8* %5, align 1
   if (!LI)
     return false;
 
   BB = dyn_cast<BasicBlock>(LI->getParent()->getPrevNode());
   BI = dyn_cast<BranchInst>(&BB->back());
-  if (!BI)
+  // Check for instruction: br label %53
+  if (!BI && BI->isUnconditional())
     return false;
 
   BB = dyn_cast<BasicBlock>(BI->getParent()->getPrevNode());
   BI = dyn_cast<BranchInst>(&BB->back());
+  // Check for instruction: br label %52
   if (!BI)
     return false;
 
   SI = dyn_cast<StoreInst>(BI->getPrevNode());
+  // Check for instruction: store i16 %51, i16* %4, align 2
   if (!SI)
     return false;
 
   TruncInst *TI = dyn_cast<TruncInst>(SI->getPrevNode());
+  // Check for instruction: %51 = trunc i32 %50 to i16
   if (!TI)
     return false;
 
   // For some reason we could not see trunc instruction!
   II = dyn_cast<Instruction>(TI->getPrevNode());
+  // Check for instruction: %50 = and i32 %49, 32767
   if (!match(II, m_And((m_Value(help1)), m_SpecificInt(32767))))
     return false;
 
   ZExtInst *ZI = dyn_cast<ZExtInst>(II->getPrevNode());
+  // Check for instruction: %49 = zext i16 %48 to i32
   if (!ZI)
     return false;
 
   LI = dyn_cast<LoadInst>(ZI->getPrevNode());
+  // Check for instruction: %48 = load i16, i16* %4, align 2
   if (!LI)
     return false;
 
@@ -134,26 +151,32 @@ static bool recognizingUnoptimizedCRCInstructions(Instruction &I){
     return false;
 
   BI = dyn_cast<BranchInst>(&BB->back());
+  // Check for instruction: br label %52
   if (!BI)
     return false;
 
   SI = dyn_cast<StoreInst>(BI->getPrevNode());
+  // Check for instruction: store i16 %46, i16* %4, align 2
   if (!SI)
     return false;
 
   TI = dyn_cast<TruncInst>(SI->getPrevNode());
+  // Check for instruction: %46 = trunc i32 %45 to i16
   if (!TI)
     return false;
 
   II = dyn_cast<Instruction>(TI->getPrevNode()); // Should recognize -32768 constant here!
+  // Check for instruction: or i32 %44, 32768
   if (!match(II, m_Or(m_Value(help1), m_Value(help2))))
     return false;
 
   ZI = dyn_cast<ZExtInst>(II->getPrevNode());
+  // Check for instruction: %44 = zext i16 %43 to i32
   if (!ZI)
     return false;
 
   LI = dyn_cast<LoadInst>(ZI->getPrevNode());
+  // Check for instruction: %43 = load i16, i16* %4, align 2
   if (!LI)
     return false;
 
@@ -162,34 +185,42 @@ static bool recognizingUnoptimizedCRCInstructions(Instruction &I){
     return false;
 
   BI = dyn_cast<BranchInst>(&BB->back());
+  // Check for instruction: br i1 %41, label %42, label %47
   if (!BI)
     return false;
 
   ICmpInst *ICMPI = dyn_cast<ICmpInst>(BI->getPrevNode());
+  // Check for instruction: %41 = icmp ne i8 %40, 0
   if (!ICMPI)
     return false;
 
   LI = dyn_cast<LoadInst>(ICMPI->getPrevNode());
+  // Check for instruction: %40 = load i8, i8* %7, align 1
   if (!LI)
     return false;
 
   SI = dyn_cast<StoreInst>(LI->getPrevNode());
+  // Check for instruction: store i16 %39, i16* %4, align 2
   if (!SI)
     return false;
 
   TI = dyn_cast<TruncInst>(SI->getPrevNode());
+  // Check for instruction: %39 = trunc i32 %38 to i16
   if (!TI)
     return false;
 
   II = dyn_cast<Instruction>(TI->getPrevNode());
+  // Check for instruction: %38 = ashr i32 %37, 1
   if (!match(II, m_AShr(m_Value(help1), m_SpecificInt(1))))
     return false;
 
   ZI = dyn_cast<ZExtInst>(II->getPrevNode());
+  // Check for instruction: %37 = zext i16 %36 to i32
   if (!ZI)
     return false;
 
   LI = dyn_cast<LoadInst>(ZI->getPrevNode());
+  // Check for instruction: %36 = load i16, i16* %4, align 2
   if (!LI)
     return false;
 
@@ -198,10 +229,12 @@ static bool recognizingUnoptimizedCRCInstructions(Instruction &I){
     return false;
 
   BI = dyn_cast<BranchInst>(&BB->back());
+  // Check for instruction: br label %35
   if (!BI)
     return false;
 
   SI = dyn_cast<StoreInst>(BI->getPrevNode());
+  // Check for instruction: store i8 0, i8* %7, align 1
   if (!SI)
     return false;
 
@@ -210,6 +243,7 @@ static bool recognizingUnoptimizedCRCInstructions(Instruction &I){
     return false;
 
   BI = dyn_cast<BranchInst>(&BB->back());
+  // Check for instruction: br label %35
   if (!BI)
     return false;
 
@@ -255,27 +289,33 @@ static bool recognizingUnoptimizedCRCInstructions(Instruction &I){
   }
 
   if(!flag){
+    // Check for instruction: store i16 %33, i16* %4, align 2
     SI = dyn_cast<StoreInst>(BI->getPrevNode());
     if (!SI)
       return false;
     
+    // Check for instruction: %33 = trunc i32 %32 to i16
     TI = dyn_cast<TruncInst>(SI->getPrevNode());
     if (!TI)
       return false;
     
     II = dyn_cast<Instruction>(TI->getPrevNode());
+    // Check for instruction: %32 = xor i32 %31, 16386
     if (!match(II, m_Xor(m_Value(help1), m_SpecificInt(16386))))
       return false; 
 
     ZI = dyn_cast<ZExtInst>(II->getPrevNode());
+    // Check for instruction: %31 = zext i16 %30 to i32
     if (!ZI)
       return false;
     
     LI = dyn_cast<LoadInst>(ZI->getPrevNode());
+    // Check for instruction: %30 = load i16, i16* %4, align 2
     if (!LI)
       return false;
 
     SI = dyn_cast<StoreInst>(LI->getPrevNode());
+    // Check for instruction: store i8 1, i8* %7, align 1
     if (!SI)
       return false;
   }
@@ -285,78 +325,97 @@ static bool recognizingUnoptimizedCRCInstructions(Instruction &I){
     return false;
 
   BI = dyn_cast<BranchInst>(&BB->back());
+  // Check for instruction: br i1 %28, label %29, label %34
   if (!BI)
     return false;
 
   ICMPI = dyn_cast<ICmpInst>(BI->getPrevNode());
+  // Check for instruction: %28 = icmp eq i32 %27, 1
   if (!ICMPI)
     return false;
 
   ZI = dyn_cast<ZExtInst>(ICMPI->getPrevNode());
+  // Check for instruction: %27 = zext i8 %26 to i32
   if (!ZI)
     return false;
 
   LI = dyn_cast<LoadInst>(ZI->getPrevNode());
+  // Check for instruction: %26 = load i8, i8* %6, align 1
   if (!LI)
     return false;
 
   SI = dyn_cast<StoreInst>(LI->getPrevNode());
+  // Check for instruction: store i8 %25, i8* %3, align 1
   if (!SI)
     return false;
 
   TI = dyn_cast<TruncInst>(SI->getPrevNode());
+  // Check for instruction: %25 = trunc i32 %24 to i8
   if (!TI)
     return false;
 
   II = dyn_cast<Instruction>(TI->getPrevNode());
+  // Check for instruction: %24 = ashr i32 %23, 1
   if (!match(II, m_AShr(m_Value(help1), m_SpecificInt(1))))
     return false;
 
   ZI = dyn_cast<ZExtInst>(II->getPrevNode());
+  // Check for instruction: %23 = zext i8 %22 to i32
   if (!ZI)
     return false;
 
   LI = dyn_cast<LoadInst>(ZI->getPrevNode());
+  // Check for instruction: %22 = load i8, i8* %3, align 1
   if (!LI)
     return false;
 
   SI = dyn_cast<StoreInst>(LI->getPrevNode());
+  // Check for instruction: store i8 %21, i8* %6, align 1
   if (!SI)
     return false;
 
   TI = dyn_cast<TruncInst>(SI->getPrevNode());
+  // Check for instruction: %21 = trunc i32 %20 to i8
   if (!TI)
     return false;
 
   II = dyn_cast<Instruction>(TI->getPrevNode());
+  // Check for instruction: %20 = xor i32 %15, %19
   if (!match(II, m_Xor(m_Value(help1), m_Value(help2))))
     return false;
 
   II = dyn_cast<Instruction>(II->getPrevNode());
+  // Check for instruction: %19 = and i32 %18, 1
   if (!match(II, m_And(m_Value(help1), m_SpecificInt(1))))
     return false;
 
   ZI = dyn_cast<ZExtInst>(II->getPrevNode());
+  // Check for instruction: %18 = zext i8 %17 to i32
   if (!ZI)
     return false;
 
   TI = dyn_cast<TruncInst>(ZI->getPrevNode());
+  // Check for instruction: %17 = trunc i16 %16 to i8
   if (!TI)
     return false;
 
   LI = dyn_cast<LoadInst>(TI->getPrevNode());
+  // Check for instruction: %16 = load i16, i16* %4, align 2
   if (!LI)
     return false;
 
   II = dyn_cast<Instruction>(LI->getPrevNode());
+  // Check for instruction: %15 = and i32 %14, 1
   if (!match(II, m_And(m_Value(help1), m_SpecificInt(1))))
     return false;
 
   ZI = dyn_cast<ZExtInst>(II->getPrevNode());
+  // Check for instruction: %14 = zext i8 %13 to i32
   if (!ZI)
     return false;
 
   LI = dyn_cast<LoadInst>(ZI->getPrevNode());
+  // Check for instruction: %13 = load i8, i8* %3, align 1
   if (!LI)
     return false;
 
@@ -365,18 +424,22 @@ static bool recognizingUnoptimizedCRCInstructions(Instruction &I){
     return false;
 
   BI = dyn_cast<BranchInst>(&BB->back());
+  // Check for instruction: br i1 %11, label %12, label %56
   if (!BI)
     return false;
 
   ICMPI = dyn_cast<ICmpInst>(BI->getPrevNode());
+  // Check for instruction: %11 = icmp slt i32 %10, 8
   if (!ICMPI)
     return false;
 
   ZI = dyn_cast<ZExtInst>(ICMPI->getPrevNode());
+  // Check for instruction: %10 = zext i8 %9 to i32
   if (!ZI)
     return false;
 
   LI = dyn_cast<LoadInst>(ZI->getPrevNode());
+  // Check for instruction: %9 = load i8, i8* %5, align 1
   if (!LI)
     return false;
 
@@ -385,53 +448,65 @@ static bool recognizingUnoptimizedCRCInstructions(Instruction &I){
     return false;
 
   BI = dyn_cast<BranchInst>(&BB->back());
+  // Check for instruction: br label %8
   if (!BI)
     return false;
 
   // Here we have to match 6 more consecutive store instructions and 5 consecutive alloca instructions!
   SI = dyn_cast<StoreInst>(BI->getPrevNode());
+  // Check for instruction: store i8 0, i8* %5, align 1
+  if (!SI && SI->getPointerOperandType()!=Builder.getInt8PtrTy())
+    return false;
+
+  SI = dyn_cast<StoreInst>(SI->getPrevNode());
+  // Check for instruction: store i8 0, i8* %7, align 1
+  if (!SI && SI->getPointerOperandType()!=Builder.getInt8PtrTy())
+    return false;
+
+  SI = dyn_cast<StoreInst>(SI->getPrevNode());
+  // Check for instruction: store i8 0, i8* %6, align 1
+  if (!SI && SI->getPointerOperandType()!=Builder.getInt8PtrTy())
+    return false;
+
+  SI = dyn_cast<StoreInst>(SI->getPrevNode());
+  // Check for instruction: store i8 0, i8* %5, align 1
+  if (!SI && SI->getPointerOperandType()!=Builder.getInt8PtrTy())
+    return false;
+
+  SI = dyn_cast<StoreInst>(SI->getPrevNode());
+  // Check for instruction: store i16 %1, i16* %4, align 2
   if (!SI)
     return false;
 
   SI = dyn_cast<StoreInst>(SI->getPrevNode());
-  if (!SI)
-    return false;
-
-  SI = dyn_cast<StoreInst>(SI->getPrevNode());
-  if (!SI)
-    return false;
-
-  SI = dyn_cast<StoreInst>(SI->getPrevNode());
-  if (!SI)
-    return false;
-
-  SI = dyn_cast<StoreInst>(SI->getPrevNode());
-  if (!SI)
-    return false;
-
-  SI = dyn_cast<StoreInst>(SI->getPrevNode());
-  if (!SI)
+  // Check for instruction: store i8 %0, i8* %3, align 1
+  if (!SI && SI->getPointerOperandType()!=Builder.getInt8PtrTy())
     return false;
 
   // Last thing we have to match are 5 alloca instructions!
   AllocaInst *AI = dyn_cast<AllocaInst>(SI->getPrevNode());
-  if (!AI)
+  // Check for instruction: %7 = alloca i8, align 1
+  if (!AI && AI->getAllocatedType()!=Builder.getInt8Ty())
     return false;
 
   AI = dyn_cast<AllocaInst>(AI->getPrevNode());
-  if (!AI)
+  // Check for instruction: %6 = alloca i8, align 1
+  if (!AI && AI->getAllocatedType()!=Builder.getInt8Ty())
     return false;
 
   AI = dyn_cast<AllocaInst>(AI->getPrevNode());
-  if (!AI)
+  // Check for instruction: %5 = alloca i8, align 1
+  if (!AI && AI->getAllocatedType()!=Builder.getInt8Ty())
     return false;
 
   AI = dyn_cast<AllocaInst>(AI->getPrevNode());
-  if (!AI)
+  // Check for instruction: %4 = alloca i16, align 2
+  if (!AI && AI->getAllocatedType()!=Builder.getInt16Ty())
     return false;
 
   AI = dyn_cast<AllocaInst>(AI->getPrevNode());
-  if (!AI)
+  // Check for instruction: %3 = alloca i8, align 1
+  if (!AI && AI->getAllocatedType()!=Builder.getInt8Ty())
     return false;
 
   return true;  
@@ -732,9 +807,8 @@ PreservedAnalyses RecognizingCRCPass::run(Function &F, FunctionAnalysisManager &
       errs() << "The CRC optimization with intrinsic function has been successfully applied!" << "\n";
     }
   } else if (UseNaiveCRCOptimization && UseIntrinsicsCRCOptimization) {
-    errs() << "Wrong usage! Chose one optimization approach only!\n";
+    errs() << "Wrong usage! Choose one optimization approach only!\n";
   }
 
   return PreservedAnalyses::all();
 }
-
