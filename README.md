@@ -6,16 +6,28 @@ Master rad predstavlja poslednju stavku koju je potrebno ispuniti kako bi se usp
 Master rad koji će u ovom repozitorijumu biti predstavljen je urađen za potrebe master studija na Matematičkom fakultetu Univerziteta u Beogradu.
 
 ## Sadržaj:
-U nastavku su navedene glavne stavke koje je u radu potrebno objasniti. Lista stavki će se potencijalno menjati:
-- Uvod
-- Faze prevođenja programa
-- Bitni delovi kompilatora (frontend, middle-end, backend)
-- Kompajlerska infrastruktura LLVM
-- LLVM međureprezentacija
-- Algoritam CRC (Cyclic Redundancy Check) i problem njegovog prepoznavanja
-- Arhitektura RISCV
-- Implementacija rešenja
-- Rezultati implementacije
+U nastavku je naveden sadržaj master rada:
+- Uvod 
+- Kompilatori i projekat LLVM
+  - Osnovne vrste prevodilaca 
+  - Faze prevođenja 
+  - Bitni delovi kompilatora 
+  - Kompilatorske optimizacije 
+  - Kompilatorska infrastruktura LLVM 
+  - LLVM međureprezentacija 
+  - LLVM infrastruktura za testiranje 
+- Algoritam CRC i problem njegovog prepoznavanja 
+  - Algoritam CRC 
+  - Problem prepoznavanja algoritma CRC 
+- Procesorske arhitekture i arhitektura RISC-V
+  - Procesorske arhitekture RISC i CISC
+  - Arhitektura RISC-V 
+- Implementacija i evaluacija rešenja 
+  - Implementacija na IR nivou
+  - Implementacija pomoću intrinzičkih funkcija
+  - Regresioni testovi 
+  - Funkcionalna ispravnost implementacije
+  - Rezultati evaluacije efikasnosti optimizacije
 - Zaključak
 
 ## Postavka problema
