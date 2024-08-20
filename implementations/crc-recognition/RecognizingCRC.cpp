@@ -117,28 +117,28 @@ static bool recognizingUnoptimizedCRCInstructions(Instruction &I){
   BB = dyn_cast<BasicBlock>(BI->getParent()->getPrevNode());
   BI = dyn_cast<BranchInst>(&BB->back());
   // Check for instruction: br label %52
-  if (!BI)
+  if (!BI && BI->isUnconditional())
     return false;
 
   SI = dyn_cast<StoreInst>(BI->getPrevNode());
   // Check for instruction: store i16 %51, i16* %4, align 2
-  if (!SI)
+  if (!SI || !match(SI, m_Store(m_Trunc(m_Value(help1)), m_Value(help2))))
     return false;
 
   TruncInst *TI = dyn_cast<TruncInst>(SI->getPrevNode());
   // Check for instruction: %51 = trunc i32 %50 to i16
-  if (!TI)
+  if (!TI || !match(TI, m_Trunc(m_And(m_Value(help1), m_SpecificInt(32767)))))
     return false;
 
   // For some reason we could not see trunc instruction!
   II = dyn_cast<Instruction>(TI->getPrevNode());
   // Check for instruction: %50 = and i32 %49, 32767
-  if (!match(II, m_And((m_Value(help1)), m_SpecificInt(32767))))
+  if (!match(II, m_And((m_ZExt(m_Value(help1))), m_SpecificInt(32767))))
     return false;
 
   ZExtInst *ZI = dyn_cast<ZExtInst>(II->getPrevNode());
   // Check for instruction: %49 = zext i16 %48 to i32
-  if (!ZI)
+  if (!ZI || !match(ZI, m_ZExt(m_Load(m_Value(help1)))))
     return false;
 
   LI = dyn_cast<LoadInst>(ZI->getPrevNode());
@@ -146,13 +146,14 @@ static bool recognizingUnoptimizedCRCInstructions(Instruction &I){
   if (!LI)
     return false;
 
+  errs() << "Here we are?!\n";
   BB = dyn_cast<BasicBlock>(LI->getParent()->getPrevNode());
   if (!BB)
     return false;
 
   BI = dyn_cast<BranchInst>(&BB->back());
   // Check for instruction: br label %52
-  if (!BI)
+  if (!BI || !BI->isUnconditional())
     return false;
 
   SI = dyn_cast<StoreInst>(BI->getPrevNode());
@@ -186,7 +187,7 @@ static bool recognizingUnoptimizedCRCInstructions(Instruction &I){
 
   BI = dyn_cast<BranchInst>(&BB->back());
   // Check for instruction: br i1 %41, label %42, label %47
-  if (!BI)
+  if (!BI || !BI->isConditional())
     return false;
 
   ICmpInst *ICMPI = dyn_cast<ICmpInst>(BI->getPrevNode());
