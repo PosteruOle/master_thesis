@@ -1,9 +1,23 @@
 # Automatska detekcija i optimizacija algoritma CRC u okviru kompajlerske infrastrukture LLVM
-Ovaj repozitorijum će sadržati implementaciju i objašnjene master rada na temu "Prepoznavanje CRC algoritma i zamena optimizovanom verzijom za potrebe RISCV arhitekture u okviru kompajlerske infrastrukture LLVM". 
+Ovaj repozitorijum sadrži implementaciju i tekst master rada na temu "Automatska detekcija i optimizacija algoritma CRC u okviru kompajlerske infrastrukture LLVM". 
 
 Master rad predstavlja poslednju stavku koju je potrebno ispuniti kako bi se uspešno završile master studije. 
 
-Master rad koji će u ovom repozitorijumu biti predstavljen je urađen za potrebe master studija na Matematičkom fakultetu Univerziteta u Beogradu.
+Master rad predstavljen u ovom repozitorijumu je urađen za potrebe master studija na Matematičkom fakultetu Univerziteta u Beogradu.
+
+## Apstrakt
+
+U savremenoj industriji razvoja softvera, efikasnost i optimizacija koda predstavljaju ključne aspekte u postizanju visokih performansi računarskih sistema. 
+Ovaj master rad istražuje inovativan pristup prevođenju algoritma CRC (eng.Cyclic Redundancy Check) korišćenjem kompilatorske infrastrukture LLVM. 
+Algoritam CRC detektuje potencijalne promene u podacima nastalim usled transfera kroz različite medijume (žičane mreže, bežične mreže ili optičke kablove) i ima
+široku primenu u digitalnoj komunikaciji, gde se koristi za proveru integriteta podataka. Zbog svoje učestale primene važno je koristiti optimizovane verzije ovog
+algoritma.
+
+
+Cilj ovog rada je unapređenje infrastrukture LLVM u kontekstu prevođenja algoritma CRC, i na taj način ostvarivanje boljih performansi programa koji koriste 
+algoritam CRC i LLVM kao svoj kompilator. Osnovna ideja rešenja predstavljenog u radu zasniva se na detekciji neoptimizovane verzije algoritma CRC
+na nivou LLVM međureprezentacije i zamenjivanju funkcionalno ekvivalentnom optimizovanom verzijom. Unapređenje je vidljivo na različitim procesorskim arhitekturama, 
+specijalno i na procesorskoj arhitekturi RISC-V. Rezultati dobijeni testiranjem predstavljenog rešenja pokazuju značajno poboljšanje performansi algoritma CRC prevedenog LLVM kompilatorom.
 
 ## Sadržaj:
 U nastavku je naveden sadržaj master rada:
