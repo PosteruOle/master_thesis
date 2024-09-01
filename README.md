@@ -97,18 +97,30 @@ prolaza jeste detektovanje proširenog oblika kvadrata binoma (a2 + 2ab + b2) i 
 
 
 ## Kompajlerska infrastruktura LLVM
-Projekat LLVM započet je 2000. godine na Univerzitetu Ilinois od strane Krisa
-Latnera. Cilj projekta je bio proučavanje tehnika kompiliranja u SSA obliku (eng. Static Single Assign-
-ment) koje podržavaju statičku i dinamičku kompilaciju proizvoljnih programskih
-jezika. Naziv LLVM je predstavljao akronim za „virtuelna mašina niskog nivoa”
-(eng. Low Level Virtual Machine). Međutim, isti akronim se više ne koristi, ali je ime projekta
-ostalo nepromenjeno. Danas, projekat sadrži veliki broj biblioteka i alata koji se
-koriste kako u komercijalne svrhe tako i u svrhe razvoja projekata otvorenog koda. Svaki deo projekta je dizajniran 
-kao biblioteka tako da se može ponovo upotrebiti za implementiranje drugih
-alata. Celokupan izvorni kôd je javno dostupan na servisu GitHub i oko njega je formirana velika zajednica ljudi koji 
-rade na različitim delovima LLVM i svakodnevno ga unapređuju. Veliki broj kompanija koristi svoje verzije kompilatora 
-LLVM bilo u celosti bilo samo neke njegove delove (prednji, srednji ili zadnji deo kimpilatora) za podršku neke 
-arhitekture ili kao osnovu za novi programski jezik.
+Projekat LLVM je započet kao istraživački projekat 2000. godine na Univerzitetu Ilinois od strane Krisa Latnera, čoveka koga je ovaj projekat i proslavio,
+a koji danas radi na razvoju programskog jezika Mojo. Cilj projekta LLVM je bio proučavanje tehnika statičkog i dinamičkog prevođenja proizvoljnih 
+programskih jezika korišćenjem kompiliranja u SSA obliku (eng. Static Single Assignment). Naziv LLVM je predstavljao akronim za „virtuelna mašina niskog nivoa” 
+(eng. Low Level Virtual Machine). Međutim, isti akronim se više ne koristi, ali je ime projekta ostalo nepromenjeno. Danas, projekat sadrži veliki broj biblioteka i alata
+koji se koriste kako u komercijalne svrhe tako i u svrhe razvoja projekata otvorenog koda. Svaki deo projekta je dizajniran kao biblioteka tako da se može ponovo
+upotrebiti za implementiranje drugih alata. Celokupan izvorni kôd je javno dostupan na servisu GitHub2 i oko njega je formirana velika zajednica ljudi koji rade
+na različitim delovima projekta i svakodnevno ga unapređuju. Veliki broj kompanija koristi svoje verzije kompilatora LLVM bilo u celosti bilo samo neke njegove
+delove (prednji, srednji ili zadnji deo kompilatora) za podršku neke procesorske arhitekture ili kao osnovu za novi programski jezik.
+
+
+O popularnosti projekta LLVM govori i činjenica da je 2012. godine projekat osvojio nagradu ACM Software System Award (nagrada se dodeljuje jednom
+softverskom sistemu godišnje, počevši od 1983. godine), kao i da se dva puta u toku svake godine organizuje LLVM Developers Meeting i LLVM WorkShop u
+različitim gradovima Evrope i Amerike. Licenca koda u okviru LLVM projekta je ”Apache 2.0 License with LLVM exceptions”. Licenciranje se menjalo tokom
+razvoja projekta, ali je projekat uvek bio otvorenog koda.
+
+LLVM se sastoji od velikog broja manjih potprojekata koji predstavljaju zasebne i funkcionalne celine. Neki od primarnih potprojekata su LLVM Core Libraries, 
+Clang, MLIR, OpenMP, polly, klee, LLD. Svi potprojekti zajedno čine potpun programski prevodilac koji pored svog prednjeg, srednjeg i zadnjeg dela poseduje 
+optimizatore, asemblere, linkere i druge alate koji pružaju podršku tokom čitavog procesa prevođenja. LLVM implementira i svoj debager koji se zove LLDB.
+
+
+Kompilator LLVM je relativno nov u odnosu na druge popularne kompilatore i prati moderniji dizajn. Za razliku od kompilatora GCC, 
+koji je napisan u jeziku C i ima monolitnu strukturu, LLVM uživa u pogodnostima koje nudi jezik C++ pritom koristeći modularnu arhitekturu. 
+Najveći deo projekta je napisan u programskom jeziku C++, ali postoji i interfejs za linkovanje sa jezicima C i Python. 
+Implementacija kompilatora LLVM prati opštu strukturu kompilatora prikazanu u poglavlju 2.2.
 
 ## Zaključak:
 Cilj ovog rada je da predstavi jedan pravac unapređenja kompilatorske infrastrukture LLVM
