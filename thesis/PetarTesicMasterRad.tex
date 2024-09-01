@@ -90,22 +90,23 @@
 
 % Apstrakt na srpskom jeziku (u odabranom pismu)
 \apstr{
-U savremenoj industriji razvoja softvera, efikasnost i optimizacija koda predstavljaju ključne 
-aspekte u postizanju visokih performansi računarskih sistema. Ovaj master rad 
+U savremenoj industriji razvoja softvera, efikasnost i optimizacija koda predstavljaju 
+ključne aspekte u postizanju visokih performansi računarskih sistema. Ovaj master rad 
 istražuje inovativan pristup prevođenju algoritma CRC (eng. \textit{Cyclic Redundancy 
-Check}) korišćenjem kompilatorske infrastrukture LLVM. Algoritam CRC detektuje potencijalne 
-promene u podacima nastalim usled transfera kroz različite medijume (žičane mreže, bežične 
-mreže ili optičke kablove) i ima široku primenu u digitalnoj komunikaciji, gde se koristi za 
-proveru integriteta podataka. Zbog svoje učestale primene važno je koristiti optimizovane 
-verzije ovog algoritma.
+Check}) korišćenjem kompilatorske infrastrukture LLVM. Algoritam CRC detektuje 
+potencijalne promene u podacima nastalim usled transfera kroz različite medijume 
+(žičane mreže, bežične mreže ili optičke kablove) i ima široku primenu u digitalnoj 
+komunikaciji, gde se koristi za proveru integriteta podataka. Zbog svoje učestale 
+primene važno je koristiti optimizovane verzije ovog algoritma.
  
-Cilj ovog rada je unapređenje infrastrukture LLVM u kontekstu prevođenja algoritma CRC, i na 
-taj način ostvarivanje boljih performansi programa koji koriste algoritam CRC i LLVM kao svoj 
-kompilator. Osnovna ideja rešenja predstavljenog u radu zasniva se na  
-detekciji neoptimizovane verzije algoritma CRC na nivou LLVM međureprezentacije i zamenjivanju funkcionalno ekvivalentnom optimizovanom verzijom. Unapređenje je vidljivo
-na različitim procesorskim arhitekturama, specijalno i na procesorskoj arhitekturi RISC-V. 
-Rezultati dobijeni testiranjem predstavljenog rešenja pokazuju značajno poboljšanje 
-performansi algoritma CRC prevedenog LLVM kompilatorom.
+Cilj ovog rada je unapređenje infrastrukture LLVM u kontekstu prevođenja algoritma 
+CRC, i na taj način ostvarivanje boljih performansi programa koji koriste algoritam 
+CRC i LLVM kao svoj kompilator. Osnovna ideja rešenja predstavljenog u radu zasniva se 
+na detekciji neoptimizovane verzije algoritma CRC na nivou LLVM međureprezentacije i 
+zameni funkcionalno ekvivalentnom optimizovanom verzijom. Unapređenje je vidljivo
+na različitim procesorskim arhitekturama, specijalno i na procesorskoj arhitekturi 
+RISC-V. Rezultati dobijeni testiranjem predstavljenog rešenja pokazuju značajno 
+poboljšanje performansi algoritma CRC prevedenog LLVM kompilatorom.
 \\
 }
 
@@ -151,7 +152,9 @@ U ovom radu biće predstavljene optimizacije implementirane u okviru kompilatora
 Rad se sastoji od šest poglavlja. U poglavlju \ref{chap:llvm} se govori o procesu prevođenja programa, metodologijama konstrukcije kompilatora i o kompilatorskoj infrastrukturi LLVM. Predstavljena je istorija samog projekta, arhitektura projekta, delovi kompilatora i međureprezentacija koju LLVM koristi. Dodatno, opisana je i infrastruktura za testiranje. 
 Poglavlje \ref{chap:crc} je posvećeno algoritmu CRC i problemu njegovog prepoznavanja. Predstavljen je koncept detektovanja grešaka u podacima, zajedno sa trenutnim načinima korekcije i detekcije grešaka. Poglavlje \ref{chap:riscv} je posvećeno procesorskim arhitekturama, sa akcentom na procesorsku arhitekturu RISC-V jer je baš za nju predložena jedna optimizacija u okviru ovog rada. 
 U poglavlju \ref{chap:implementacija} su predstavljena dva rešenja problema detektovanja algoritma CRC i njegovog optimizovanja. Na početku poglavlja su opisani ideja i postupak zajednički za oba rešenja, a u nastavku su redom nalaze detalji implementacije svakog od predloženih rešenja.
-Poslednja sekcija u poglavlju \ref{chap:implementacija} opisuje rezultate eksperimentalne evaluacije predloženih rešenja. Rezultati pokazuju za čak 35\% bolju vremensku efikasnost programa nad kojim je pokrenuta jedna od predloženih implementacija. U poglavlju \ref{chap:zakljucak} je sumirano sve što je predstavljeno u radu i ostavljene su smernice i sugestije čitaocima rada za dalje istraživanje na temu unapređenja LLVM i drugih kompilatora, a i na temu kompilatorskih optimizacija. 
+Poslednja sekcija u poglavlju \ref{chap:implementacija} opisuje rezultate eksperimentalne evaluacije predloženih rešenja. 
+%Rezultati pokazuju za čak 35\% bolju vremensku efikasnost programa nad kojim je pokrenuta jedna od predloženih implementacija. 
+U poglavlju \ref{chap:zakljucak} je sumirano sve što je predstavljeno u radu i ostavljene su smernice i sugestije čitaocima rada za dalje istraživanje na temu unapređenja LLVM i drugih kompilatora, a i na temu kompilatorskih optimizacija. 
 
 % ------------------------------------------------------------------------------
 \chapter{Kompilatori i projekat LLVM}
@@ -161,9 +164,9 @@ Poslednja sekcija u poglavlju \ref{chap:implementacija} opisuje rezultate eksper
 Izvršavanje programa omogućavaju programski prevodioci koji prevode program iz višeg programskog jezika u k\^od koji računar može da izvrši. Za samo izvršavanje programa, posebno je važna efikasnost koja u velikoj meri zavisi od optimizacija koje programski prevodioci sprovode u toku prevođenja programa.  
 
 \section{Osnovne vrste prevodilaca}
-Programski prevodioci mogu vršti kompilaciju programa ili njegovu interpretaciju. Za kompilaciju programa koriste se kompilatori, a za interpretaciju interpreteri.
+Programski prevodioci mogu vršti kompilaciju programa ili njegovu interpretaciju. Za kompilaciju programa koriste se kompilatori, a za interpretaciju interpretatori.
 
-Kompilatori iliti kompajleri predstavljaju veoma kompleksan softver sposoban da proizvoljan k\^od napisan u nekom višem programskom jeziku konvertuje u kvalitetan mašinski k\^od koji će se potom izvršavati na računaru. Proces kompilacije podrazumeva razdvojenost procesa prevođenja i procesa izvršavanja programa. Kompilacijom se kreira izvršiva datoteka koju je potom moguće pokretati, to jest, izvršavati na računaru proizvoljan broj puta. Za svaku promenu u izvornom kodu potrebno je ponoviti proces kompilacije. Neki od najpoznatijih kompilatora otvorenog koda danas su GCC \cite{gcc}, LLVM, RUSTC \cite{rustc} i GraalVM \cite{graalvm}. Primeri programskih jezika za čije prevođenje je potrebno koristiti kompilaciju su C, C++, Rust i Go. Skica procesa kompilacije prikazana je na slici \ref{tikz:kompilacija}.
+Kompilatori ili kompajleri predstavljaju veoma kompleksan softver sposoban da proizvoljan sintaksno ispravan k\^od napisan u nekom višem programskom jeziku konvertuje u kvalitetan mašinski k\^od koji će se potom izvršavati na računaru. Proces kompilacije podrazumeva razdvojenost procesa prevođenja i procesa izvršavanja programa. Kompilacijom se kreira izvršiva datoteka koju je potom moguće pokretati, to jest, izvršavati na računaru proizvoljan broj puta. Za svaku promenu u izvornom kodu potrebno je ponoviti proces kompilacije. Neki od najpoznatijih kompilatora otvorenog koda danas su GCC \cite{gcc}, LLVM, RUSTC \cite{rustc} i GraalVM \cite{graalvm}. Primeri programskih jezika za čije prevođenje je potrebno koristiti kompilaciju su C, C++, Rust i Go. Skica procesa kompilacije prikazana je na slici \ref{tikz:kompilacija}.
 
 \begin{figure}
 \centering
@@ -207,7 +210,7 @@ Bilo koja greška u programu biće otkrivena tek kada se prevođenjem i izvršav
  ][!ht]
  \centering
  %Nodes
- \node[squarednode]      (interpreter_node)  {\textbf{Interpreter}};
+ \node[squarednode]      (interpreter_node)  {\textbf{Interpretator}};
  \node[ellibig]        (izlaz_node)       [right=of interpreter_node] {\textbf{Izlaz}};
  \node[ellibig]        (program_node)       [left=of interpreter_node, yshift=-30pt] {\textbf{Program}};
  \node[ellibig]        (podaci_node)       [above=of program_node] {\textbf{Podaci}};
@@ -221,57 +224,6 @@ Bilo koja greška u programu biće otkrivena tek kada se prevođenjem i izvršav
 \caption{Proces interpretacije i izvršavanja}
 \label{tikz:interpretacija}
 \end{figure}
-
-
-\section{Faze prevođenja programa}
-
-U okviru procesa prevođenja programa postoje više različitih faza \cite{dragon_book}: 
-\begin{itemize}
- \item leksička analiza, 
-\item sintaksička analiza, 
-\item semantička analiza,
-\item generisanje međukoda,
-\item optimizacija međukoda i 
-\item generisanje i optimizacija mašinskog koda. 
-\end{itemize}
-Bitan korak koji se izvršava pre faze leksičke analize, ali koji ne smatramo posebnom fazom prevođenja, jeste pretprocesiranje. U okviru pretprocesiranja se obrađuju direktive poput \texttt{\#include} i \texttt{\#define} direktiva u programskom jeziku \texttt{C}. Korak koji se izvršava nakon prevođenja, a koji takođe ne smatramo posebnom fazom prevođenja, jeste linkovanje. Linkovanjem se kreira jedinstvena izvšiva datoteka od jednog ili više objektnih modula. Objektni moduli mogu nastati ili kompilacijom izvornog koda ili sadržati mašinski k\^od i podatke standardne ili neke nestandardne biblioteke.
-
-U fazi leksičke analize, za koju je odgovaran deo programskog prevodioca koji zovemo leksički 
-analizator ili lekser, ustanovljava se da li su u izvornom kodu iskorišćene samo dopustive 
-lekseme iliti tokeni. Pod dopustivim leksemama podrazumevamo reči napisane u izvornom kodu 
-koje mogu biti prepoznate konačnim automatima kreiranim na osnovu odgovarajućih regularnih 
-izraza. Regularni izrazi imaju za cilj da opišu imena promenljivih, ključne reči, operatore, 
-separatore i tako dalje. 
-
-Ukoliko je program koji prevodimo sačinjen isključivo od dopustivih 
-leksema, u tom slučaju niz prepoznatih leksema se prosleđuje delu programskog prevodioca 
-zaduženom za sintaksičku analizu, sintaksičkom analizatoru iliti parseru. U protivnom, u 
-slučaju detektovanja nedopustive lekseme, proces prevođenja se zaustavlja i programski 
-prevodilac nam saopštava poruku o leksičkoj greški. 
-
-U narednoj fazi, fazi sintaksičke analize, proverava se da li su prepoznate lekseme složene u 
-skladu sa gramatikom programskog jezika u kome je izvorni k\^od napisan. 
-Pravila slaganja leksema odnosno formiranja rečeničnih konstrukcija se zadaju korišćenjem 
-kontekstno-slobodne gramatike (eng. \textit{context-free grammar}). 
-
-Prolaskom kroz naredbe programa i korišćenjem potisnih automata (kreiranim na osnovu gramatike) proverava se da li su instrukcije u skladu sa gramatikom programskog jezika. Ukoliko jesu, na osnovu njih se gradi stablo parsiranja (eng. \textit{parse tree}). 
-
-%Promenjeno!!!!!!
-Stablo parsiranja je struktura nalik stablu koja predstavlja sintaksičku strukturu programa. Sastoji se od čvorova, od kojih svaki odgovara elementu programskog jezika u kome je program napisan. Unutrašnji čvorovi stabla parsiranja su predstavljeni neterminalima (ključnim rečima, operatorima, ...), dok su listovi stabla parsiranja predstavljeni terminalima (konstantama, imenima promenljivih, ...). Stablom parsiranja se ne apstrahuju detalji sintakse programskog jezika. Time ova struktura predstavlja detaljniji prikaz izvornog koda i često je korisna za debagovanje. 
-
-Prolaskom kroz stablo parsiranja se prikupljaju informacije o funkcijama, promenljivama i drugim objektima i smeštaju se u tabelu simbola. Korišćenjem tabele simbola proverava se struktura stabla parsiranja. Na osnovu stabla parsiranja se potom kreira apstraktno sintaksno stablo programa (eng. \textit{Abstract Syntax Tree - AST}) \cite{ast}. 
-
-Apstraktno sintaksno stablo je u suštini pojednostavljena verzija stabla parsiranja. 
-Čvorovi apstraktnog sintaksnog stabla su apstrahovani od detalja sintakse programskog jezika, što ovu strukturu čini sažetijom i lakšom za čitanje od stabla parsiranja.
-Apstraktnim sintaksnim stablom je, takođe, olakšano i zaključivanje o strukturi koda.
-
-U slučaju upotrebe nedozvoljene rečenične konstrukcije, proces prevođenja se zaustavlja i prevodilac nam saopštava poruku o sintaksnoj greški. Ukoliko do takve greške nije došlo, započinje se faza semantičke analize u kojoj se proverava značenje ispravnim rečeničnim konstrukcijama. Provera semantičke ispravnosti programa podrazumeva više nezavisnih provera poput provere tipova, provere labela, provere kontrole toka programa. Na primer, proverom tipova se proverava da li svaka operacija u programu podržana sistemom tipova jezika u kome je program napisan.
-
-Tokom faze generisanja međukoda se od izvornog koda generiše k\^od nezavisan od programskog jezika koji nazivamo međukodom iliti međureprezentacijom. Međureprezentacija služi kao most između visokog nivoa apstrakcije izvornog koda i niskog nivoa apstrakcije instrukcija ciljne arhitekture. Nakon generisanja međukoda sledi faza njegove optimizacije. Faza generisanja mašinskog koda i njegova optimizacija je poslednja faza prevođenja u kojoj se od optimizovanog međukoda dobija krajnji mašinski k\^od za ciljnu procesorsku arhitekturu. Rešenja opisana u ovom radu predstavljaju optimizacije koje se odvijaju upravo u fazama optimizacije međukoda i optimizacije mašinskog koda.
-
-% Cilj ove faze jeste analiziranje i optimizovanje međukoda kako bi se od njega dobio kvalitetan mašinski kod. 
-
-%  Generisani mašinski k\^od se potom optimizuje kako bi mu se smanjio broj instrukcija ili kako bi se određene instrukcije zamenile ekvivalentim, ali efikasnijim instrukcijama. 
 
 % ------------------------------------------------------------------------------
 \section{Bitni delovi kompilatora}
@@ -337,18 +289,77 @@ ekvivalentan, ali brži ili manji oblik. Izbor optimizacija koje će biti izvrš
 \end{figure}
 
 %Zadnji deo kompilatora...
-Zadnji deo kompilatora (eng. \textit{back end}) zavisi od ciljne arhitekture i zadužen je za 
-generisanje koda za ciljnu arhitekturu. Generisanje koda podrazumeva transliranje transformisanog međukoda u izlazni 
-jezik, obično mašinski jezik računarskog sistema. Ovo uključuje odluke vezane 
-za resurse i skladištenje podataka, kao na primer koje promenljive će biti u 
-registrima a koje u memoriji, i izbor i određivanje redosleda instrukcija 
-zajedno sa odgovarajućim tipovima adresiranja. Takođe, potrebno je generisati i podatke za dabagovanje kako bi se omogućilo debagovanje izvornog programa.
+Zadnji deo kompilatora (eng. \textit{back end}) zavisi od ciljne arhitekture i zadužen 
+je za generisanje koda za ciljnu arhitekturu. Generisanje koda podrazumeva 
+transliranje transformisanog međukoda u izlazni jezik, obično mašinski jezik 
+računarskog sistema. Ovo uključuje odluke vezane za resurse i skladištenje podataka, 
+kao na primer koje promenljive će biti u registrima, a koje u memoriji, i izbor i 
+određivanje redosleda instrukcija zajedno sa odgovarajućim tipovima adresiranja. 
+Takođe, potrebno je generisati i podatke za dabagovanje kako bi se omogućilo 
+debagovanje izvornog programa.
 
-Zadnji deo kompilatora je odgovoran i za sprovođenje mašinski zavisnih optimizacija, odnosno optimizacija koje zavise od detalja arhitekture procesora na kojem će se program izvršavati. Mašinski zavisne optimizacije obuhvataju, na primer, prepisivanje kraćih nizova instrukcije u odgovarajuće efikasnije instrukcije.
+Zadnji deo kompilatora je odgovoran i za sprovođenje mašinski zavisnih optimizacija, 
+odnosno optimizacija koje zavise od detalja arhitekture procesora na kojem će se 
+program izvršavati. Mašinski zavisne optimizacije obuhvataju, na primer, prepisivanje 
+kraćih nizova instrukcije u odgovarajuće efikasnije instrukcije.
 
+Za generisanje mašinskog koda potrebni su samo prednji i zadnji deo kompilatora. Optimizator odnosno srednji deo kompilatora je opcioni i nastao je iz potrebe da dobijeni kôd ima dobre performanse. Svaki dobar kompilator ga sadrži i on predstavlja njegovu najveću komponentu. Skica arhitekture modernih kompilatora prikazana je na slici \ref{tikz:delovi_kompilatora}.
 
+% ------------------------------------------------------------------------------
+\section{Faze prevođenja programa}
+% ------------------------------------------------------------------------------
 
-Za generisanje mašinskog koda potrebni su samo prednji i zadnji deo kompilatora. Optimizator odnosno srednji deo kompilatora je opcioni i nastao je iz potrebe da dobijeni kôd ima dobre performanse. Svaki dobar kompilator ga sadrži i on predstavlja njegovu najveću komponentu.
+U okviru procesa prevođenja programa postoje više različitih faza \cite{dragon_book}: 
+\begin{itemize}
+ \item leksička analiza, 
+\item sintaksička analiza, 
+\item semantička analiza,
+\item generisanje međukoda,
+\item optimizacija međukoda i 
+\item generisanje i optimizacija mašinskog koda. 
+\end{itemize}
+
+% Dodato...
+U okviru prednjeg dela kompilatora odvijaju se faze leksičke, sintaksičke i semantičke analize, kao i faza generisanja međukoda. Optimizacija međukoda odvija se u srednjem delu kompilatora, dok se generisanje i optimizacija mašinskog koda odvija u zadnjem delu kompilatora.
+
+Bitan korak koji se izvršava pre faze leksičke analize, ali koji ne smatramo posebnom fazom prevođenja, jeste pretprocesiranje. U okviru pretprocesiranja se obrađuju direktive poput \texttt{\#include} i \texttt{\#define} direktiva u programskom jeziku \texttt{C}. Korak koji se izvršava nakon prevođenja, a koji takođe ne smatramo posebnom fazom prevođenja, jeste linkovanje ili povezivanje. Linkovanjem se kreira jedinstvena izvršiva datoteka od jednog ili više objektnih modula. Objektni moduli mogu nastati ili kompilacijom izvornog koda ili sadržati mašinski k\^od i podatke standardne ili neke nestandardne biblioteke.
+
+U fazi leksičke analize, za koju je odgovaran deo programskog prevodioca koji zovemo leksički 
+analizator ili lekser, ustanovljava se da li su u izvornom kodu iskorišćene samo dopustive 
+lekseme ili tokeni. Pod dopustivim leksemama podrazumevamo reči napisane u izvornom kodu 
+koje mogu biti prepoznate konačnim automatima kreiranim na osnovu odgovarajućih regularnih 
+izraza. Regularni izrazi imaju za cilj da opišu imena promenljivih, ključne reči, operatore, 
+separatore i tako dalje. 
+
+Ukoliko je program koji prevodimo sačinjen isključivo od dopustivih 
+leksema, u tom slučaju niz prepoznatih leksema se prosleđuje delu programskog 
+prevodioca zaduženom za sintaksičku analizu, sintaksičkom analizatoru ili parseru. U 
+protivnom, u slučaju detektovanja nedopustive lekseme, proces prevođenja se zaustavlja 
+i programski prevodilac nam saopštava poruku o leksičkoj grešci. 
+
+U narednoj fazi, fazi sintaksičke analize, proverava se da li su prepoznate lekseme složene u 
+skladu sa gramatikom programskog jezika u kome je izvorni k\^od napisan. 
+Pravila slaganja leksema odnosno formiranja rečeničnih konstrukcija se zadaju korišćenjem 
+kontekstno-slobodne gramatike (eng. \textit{context-free grammar}). 
+
+Prolaskom kroz naredbe programa i korišćenjem potisnih automata (kreiranim na osnovu gramatike) proverava se da li su instrukcije u skladu sa gramatikom programskog jezika. Ukoliko jesu, na osnovu njih se kreira stablo parsiranja (eng. \textit{parse tree}). 
+
+%Promenjeno!!!!!!
+Stablo parsiranja je struktura nalik stablu koja predstavlja sintaksičku strukturu programa. Sastoji se od čvorova, od kojih svaki odgovara elementu programskog jezika u kome je program napisan. Unutrašnji čvorovi stabla parsiranja su predstavljeni neterminalima, dok su listovi stabla parsiranja predstavljeni terminalima (konstantama, imenima promenljivih, ...). Stablom parsiranja se ne apstrahuju detalji sintakse programskog jezika. Time ova struktura predstavlja detaljniji prikaz izvornog koda i često je korisna za debagovanje. 
+
+Prolaskom kroz stablo parsiranja se prikupljaju informacije o funkcijama, promenljivama i drugim objektima i smeštaju se u tabelu simbola. Korišćenjem tabele simbola proverava se struktura stabla parsiranja. Na osnovu stabla parsiranja se potom kreira apstraktno sintaksno stablo programa (eng. \textit{Abstract Syntax Tree - AST}) \cite{ast}. 
+
+Apstraktno sintaksno stablo je u suštini pojednostavljena verzija stabla parsiranja. 
+Čvorovi apstraktnog sintaksnog stabla su apstrahovani od detalja sintakse programskog jezika, što ovu strukturu čini sažetijom i lakšom za čitanje od stabla parsiranja.
+Apstraktnim sintaksnim stablom je, takođe, olakšano i zaključivanje o strukturi koda.
+
+U slučaju upotrebe nedozvoljene rečenične konstrukcije, proces prevođenja se zaustavlja i prevodilac nam saopštava poruku o sintaksnoj greški. Ukoliko do takve greške nije došlo, započinje se faza semantičke analize u kojoj se proverava značenje ispravnim rečeničnim konstrukcijama. Provera semantičke ispravnosti programa podrazumeva više nezavisnih provera poput provere tipova, provere labela, provere kontrole toka programa. Na primer, proverom tipova se proverava da li svaka operacija u programu podržana sistemom tipova jezika u kome je program napisan.
+
+Tokom faze generisanja međukoda se od izvornog koda generiše k\^od nezavisan od programskog jezika koji nazivamo međukodom ili međureprezentacijom. Međureprezentacija služi kao most između visokog nivoa apstrakcije izvornog koda i niskog nivoa apstrakcije instrukcija ciljne arhitekture. Nakon generisanja međukoda sledi faza njegove optimizacije. Faza generisanja mašinskog koda i njegova optimizacija je poslednja faza prevođenja u kojoj se od optimizovanog međukoda dobija krajnji mašinski k\^od za ciljnu procesorsku arhitekturu. Rešenja opisana u ovom radu predstavljaju optimizacije koje se odvijaju upravo u fazama optimizacije međukoda i optimizacije mašinskog koda.
+
+% Cilj ove faze jeste analiziranje i optimizovanje međukoda kako bi se od njega dobio kvalitetan mašinski kod. 
+
+%  Generisani mašinski k\^od se potom optimizuje kako bi mu se smanjio broj instrukcija ili kako bi se određene instrukcije zamenile ekvivalentim, ali efikasnijim instrukcijama. 
 
 % ------------------------------------------------------------------------------
 \section{Kompilatorske optimizacije}
@@ -356,13 +367,13 @@ Za generisanje mašinskog koda potrebni su samo prednji i zadnji deo kompilatora
 % ------------------------------------------------------------------------------ 
 Kompilator sprovodi optimizacije sa ciljem povećanja performansi krajnjeg izvršivog koda. Uslov koji svaka optimizacija mora da zadovolji jeste da se optimizovani k\^od ponaša semantički ekvivalentno originalnom kodu. Performanse mogu da se odnose na vreme izvršavanja programa, memorijski prostor potreban prilikom njegovog izvršavanja, memorijski prostor potreban za skladištenje izvršive datoteke ili na energetsku efikasnost programa. 
 
-Kompilatorske optimizacije mogu biti nezavisne ili zavisne od ciljne arhitekture. Nezavisne optimizacije rade za sve ciljne arhitekture i najčešće smanjuju ukupan broj operacija koje treba izvršiti. Zavisne optimizacije koriste detalje arhitekture kako bi povećale performanse. To podrazumeva korišćenje instrukcija koje obavljaju više operacija u isto vreme, imaju kraći zapis ili rade brže od odgovarajućih instrukcija u izvornom kodu. Na primer, na arhitekturi
-\texttt{x86-64} se često instrukcija \texttt{mov eax, 0} zamenjuje instrukcijom \texttt{xor eax, eax}.
+Kompilatorske optimizacije mogu biti nezavisne ili zavisne od ciljne arhitekture. Nezavisne optimizacije rade za sve ciljne arhitekture i najčešće smanjuju ukupan broj operacija koje treba izvršiti. Zavisne optimizacije koriste detalje arhitekture kako bi povećale performanse. To podrazumeva korišćenje instrukcija koje obavljaju više operacija u isto vreme, imaju kraći zapis ili rade brže od odgovarajućih instrukcija u izvornom kodu. Na primer, na arhitekturi \texttt{x86-64} se često instrukcija \texttt{mov eax, 0} zamenjuje instrukcijom \texttt{xor eax, eax}.
+Instrukcija \texttt{mov eax, 0} vrednost registra \texttt{eax} postavlja na 0. Instrukcija \texttt{xor eax, eax} vrši ekskluzivnu disjunkciju vrednosti registra \texttt{eax} sa samom sobom (što uvek rezultuje nulom) i rezultat upisuje u registar \texttt{eax}. Obe instrukcije imaju isti efekat, ali se instrukcija \texttt{xor eax, eax} brže izvršava jer, za razliku od instrukcije \texttt{mov eax, 0}, ne pristupa memoriji.
 
 %!!!!!!!
 Optimizacije se u odnosu na opseg koda koji obrađuju mogu podeliti na: lokalne 
 optimizacije, globalne optimizacije i međuproceduralne optimizacije.
-Lokalne optimizacije rade na nivou jednog osnovnog bloka (eng. \textit{basic block}) i predstavljaju najjednostavnije optimizacije. Globalne optimizacije operišu na nivou pojedinačnih funkcija. Većina lokalnih optimizacija se može modifikovati da radi globalno. Međuproceduralne optimizacije rade na nivou čitavog programa. One istovremeno obrađuju više funkcija od kojih neke mogu biti i u različitim jedinicama prevođenja.
+Lokalne optimizacije rade na nivou jednog osnovnog bloka (eng. \textit{basic block})\footnote{Graf kontrole toka je usmereni graf koji služi za predstavljanje svih mogućih putanja u izvršavanju programa. Svaki čvor grafa je predstavljen osnovnim blokom i svaka usmerena grana predstavlja mogući tok izvršavanja između osnovnih blokova. Osnovni blok je sekvencijalan niz instrukcija takav da se instrukcije grananja mogu javiti isključivo na izlazu iz osnovnog bloka. Ovakva forma čini osnovni blok pogodnim za analiziranje.} i predstavljaju najjednostavnije optimizacije. Globalne optimizacije operišu na nivou pojedinačnih funkcija. Većina lokalnih optimizacija se može modifikovati da radi globalno. Međuproceduralne optimizacije rade na nivou čitavog programa. One istovremeno obrađuju više funkcija od kojih neke mogu biti i u različitim jedinicama prevođenja.
 
 Neke od popularnih optimizacija su umetanje koda (eng. \textit{inlining}), eliminacija mrtvog koda (eng. \textit{dead code elimination}), sažimanje konstanti (eng. \textit{constant folding}), propagiranje konstanti (eng. \textit{constant propagation}), razmotavanje petlji (eng. \textit{loop unrolling}) i neke vrste automatske paralelizacije. U nastavku će samo neke od navedenih optimizacija biti opisane.
 
@@ -383,18 +394,20 @@ Svaki od opisanih nivoa optimizacija ima svoju konkretnu primenu. Na primer, niv
 % ------------------------------------------------------------------------------
 \section{Kompilatorska infrastruktura LLVM}
 % ------------------------------------------------------------------------------
-Projekat LLVM \cite{llvm} je započet kao istraživački projekat 2000. godine na Univerzitetu 
-Ilinois od strane Krisa Latnera, čoveka koga je ovaj projekat i proslavio, a koji danas radi na razvoju programskog jezika Mojo \cite{mojo}. Cilj projekta LLVM je bio proučavanje tehnika statičkog i dinamičkog prevođenja proizvoljnih programskih jezika korišćenjem kompiliranja u SSA obliku (eng. \textit{Static Single Assignment}). Naziv LLVM je predstavljao akronim za „virtuelna 
+Projekat LLVM \cite{llvm} je započet kao istraživački projekat 2000. godine na Univerzitetu Ilinois od strane Krisa Latnera, čoveka koga je ovaj projekat i proslavio, a koji danas radi na razvoju programskog jezika Mojo \cite{mojo}. Cilj projekta LLVM je bio proučavanje tehnika statičkog i dinamičkog prevođenja proizvoljnih programskih jezika korišćenjem kompiliranja u SSA obliku (eng. \textit{Static Single Assignment}) \cite{ssa_form}. Naziv LLVM je predstavljao akronim za „virtuelna 
 mašina niskog nivoa” (eng. \textit{Low Level Virtual Machine}). Međutim, isti akronim se 
 više ne koristi, ali je ime projekta ostalo nepromenjeno. Danas, projekat 
 sadrži veliki broj biblioteka i alata koji se koriste kako u komercijalne svrhe 
 tako i u svrhe razvoja projekata otvorenog koda. Svaki deo projekta je 
 dizajniran kao biblioteka tako da se može ponovo upotrebiti za implementiranje 
-drugih alata. Celokupan izvorni kôd je javno dostupan na servisu \href{https://github.com/llvm/llvm-project}{GitHub} i oko njega je 
+drugih alata. Celokupan izvorni kôd je javno dostupan na servisu 
+%\href{https://github.com/llvm/llvm-project}{GitHub} 
+GitHub\footnote{Link ka GitHub repozitorijumu projekta LLVM: \href{https://github.com/llvm/llvm-project}{https://github.com/llvm/llvm-project}}
+i oko njega je 
 formirana velika zajednica ljudi koji rade na različitim delovima projekta i 
 svakodnevno ga unapređuju. Veliki broj kompanija koristi svoje verzije 
 kompilatora LLVM bilo u celosti bilo samo neke njegove delove (prednji, srednji 
-ili zadnji deo kimpilatora) za podršku neke procesorkse arhitekture ili kao 
+ili zadnji deo kompilatora) za podršku neke procesorske arhitekture ili kao 
 osnovu za novi programski jezik. 
 
 O popularnosti projekta LLVM govori i činjenica da je 2012. godine projekat osvojio nagradu 
@@ -420,13 +433,15 @@ zove LLDB \cite{lldb}.
 Kompilator LLVM je relativno nov u odnosu na druge popularne kompilatore
 i prati moderniji dizajn. Za razliku od kompilatora GCC, koji je napisan u
 jeziku C i ima monolitnu strukturu, LLVM uživa u pogodnostima koje nudi jezik
-C++ pritom koristeći modularnu arhitekturu. Najveći deo projekta je napisan u programskom jeziku C++, ali postoji i interfejs za povezivanje sa jezicima C i Python.
+C++ pritom koristeći modularnu arhitekturu. Najveći deo projekta je napisan u programskom jeziku C++, ali postoji i interfejs za linkovanje sa jezicima C i Python.
 Implementacija kompilatora LLVM prati opštu strukturu kompilatora prikazanu
 u poglavlju \ref{sec:kompilatori}. Korake kompilacije izvršavaju različiti alati. Odnos različitih
 reprezentacija programa u toku kompilacije i alata koji ga konvertuju iz jedne
 reprezantacije u drugu je prikazan na slici \ref{tikz:llvm_interne_reprezentacije}. 
- 
-U nastavku će redom biti opisani prednji, srednji i zadnji deo kompilatora LLVM sa najvećim fokusom na zadnji deo kompilatora LLVM. Jedno od rešenja koje će u poglavlju \ref{chap:implementacija} biti opisano zahteva dobro poznavanje rada zadnjeg dela kompilatora LLVM, pa je zato ovom delu posvećeno najviše pažnje.
+Svaki prelaz iz jedne interne reprezentacije u drugu (prikazan na slici) će biti ukratko objašnjen u nastavku.
+
+%Predlog profesora Mirka 
+%U nastavku će redom biti opisani prednji, srednji i zadnji deo kompilatora LLVM sa najvećim fokusom na zadnji deo kompilatora LLVM. Jedno od rešenja koje će u poglavlju \ref{chap:implementacija} biti opisano zahteva dobro poznavanje rada zadnjeg dela kompilatora LLVM, pa je zato ovom delu posvećeno najviše pažnje.
 
 % \begin{figure}
 % \includegraphics[width=\textwidth, height=3.5cm]{llvm_arhitektura}
@@ -482,7 +497,9 @@ clang -S -emit-llvm input.c -o output.ll
 
 %Srednji deo LLVM-a!!!!
 \subsection{Srednji deo LLVM-a}
-Srednji deo LLVM kompilatora zadužen je za sprovođenje mašinski nezavisnih optimizacija nad LLVM međureprezentacijom (međukodom) dobijenom od strane \textit{Clang}-a. LLVM međukod je napisan u SSA obliku pogodnom za izvršavanje optimizacija. Optimizacije srednjeg dela LLVM kompilatora su implementirane u vidu prolaza (eng. \textit{pass}). Prolazi implementiraju funkciju \texttt{run} sa argumentima za odgovarajuću jedinicu obrade. Jedinica obrade može biti modul, funkcija ili petlja. Prolazi se dele na analize i transformacije. 
+Srednji deo LLVM kompilatora zadužen je za sprovođenje mašinski nezavisnih optimizacija nad LLVM međukodom (međureprezentacijom) dobijenom od strane \textit{Clang}-a. LLVM međukod (LLVM IR k\^{o}d) je napisan u SSA obliku što znači da poštuje svojstvo jedinstvenog statičkog dodeljivanja. Ovo svojstvo omogućava da se svakoj promenljivoj samo jednom može dodeliti vrednost i da svakoj upotrebi promenljive prethodi njena definicija. 
+
+Optimizacije srednjeg dela LLVM kompilatora su implementirane u vidu prolaza (eng. \textit{pass}). Prolazi implementiraju funkciju \texttt{run} sa argumentima za odgovarajuću jedinicu obrade. Jedinica obrade može biti modul, funkcija ili petlja. Prolazi se dele na analize i transformacije. 
 
 Analize prikupljaju podatke, a transformacije te podatke koriste kako bi izmenile k\^od. 
 Transformacije zahtevaju različite vrste analiza koje mogu biti poništene nakon promene koda 
@@ -494,11 +511,15 @@ Redosled izvršavanja optimizacionih prolaza određuje LLVM-ov menadžer prolaza
 
 U okviru LLVM kompilatora postoje trenutno dva menadžera prolaza i to stari (eng. \textit{Legacy Pass Manager}) i novi (eng. \textit{New Pass Manager}). Stari menadžer prolaza se koristio dugi niz godina, ali se zbog efikasnosti prešlo na korišćenje novog menadžera. Međutim, i dalje se radi na tome da se sve funkcionalnosti podržane na starom menadžeru implementiraju i na novom. 
 
-Zadatak srednjeg dela LLVM kompilatora obavlja alat \textit{opt}. Alat kao svoje argumente očekuje imena optimizacija koje treba da pokrene i datoteku sa ispravnim LLVM IR kodom koga optimizuje. Primer poziva alata \textit{opt} za pokretanje optimizacionih prolaza \texttt{loweratomic} i \texttt{instnamer} je:
+Zadatak srednjeg dela LLVM kompilatora obavlja alat \textit{opt}. Alat kao svoje argumente očekuje imena optimizacija koje treba da pokrene i datoteku sa ispravnim LLVM međukodom koga optimizuje. Primer poziva alata \textit{opt} za pokretanje optimizacionih prolaza \texttt{loweratomic} i \texttt{instnamer} prikazan je u listingu \ref{llvm_opt_usage}. Optimizacioni prolaz \texttt{loweratomic} se koristi za spuštanje atomičkih intrinzičkih funkcija u neatomičke. Optimizacioni prolaz \texttt{instnamer} je jednostavan, ali koristan prolaz koji daje imena osnovnim blokovima, kao i operandima instrukcija. 
 
+\begin{listing}[ht!]
 \begin{minted}[breaklines, fontsize=\small]{bash}
 opt input.ll -passes="loweratomic,instnamer" -o output.ll
 \end{minted}
+\caption{Primer poziva alata \textit{opt}}
+\label{llvm_opt_usage}
+\end{listing}
 
 %Zadnji deo LLVM-a!!!!
 \subsection{Zadnji deo LLVM-a}
@@ -517,7 +538,7 @@ Implementacija \texttt{GlobalIsel} nije u potpunosti završena, ali postoji plan
 \end{description}
 Rešenja koja će u ovom radu biti predstavljena se oslanjaju na izbor instrukcija \texttt{SelectionDAG} zbog njegove stabilnosti i daleko veće korišćenosti u vreme pisanja rada.
 Pristup \texttt{SelectionDAG} je dobio ime po načinu reprezentacije koda za
-vreme izbora instrukcija. Naime, osnovni blokovi programa bivaju predstavljeni usmerenim acikličkim grafovima (eng. \textit{directed acyclic graphs}). Čvorovi tog grafa su instrukcije koje imaju tip \texttt{SDNode}, a grane predstavljaju različite zavisnosti koje postoje između instrukcija. Argumentima instrukcija se dodeljuje tip \texttt{SDValue}. Od svih čvorova u grafu posebno se izdvajaju dva i to su ulazni čvor i koren. Ulazni čvor obeležava početak osnovnog bloka i služi samo za postavljanje veza. Sa druge strane, koren označava kraj bloka. Na kraju obrade je vezan za poslednju instrukciju osnovnog bloka.
+vreme izbora instrukcija. Naime, osnovni blokovi programa bivaju predstavljeni usmerenim acikličnim grafovima (eng. \textit{directed acyclic graphs}). Čvorovi tog grafa su instrukcije koje imaju tip \texttt{SDNode}, a grane predstavljaju različite zavisnosti koje postoje između instrukcija. Argumentima instrukcija se dodeljuje tip \texttt{SDValue}. Od svih čvorova u grafu posebno se izdvajaju dva i to su ulazni čvor i koren. Ulazni čvor obeležava početak osnovnog bloka i služi samo za postavljanje veza. Sa druge strane, koren označava kraj bloka. Na kraju obrade je vezan za poslednju instrukciju osnovnog bloka.
 
 Pristup \texttt{SelectionDAG}  izboru instrukcija implementaran je pomoću istoimene klase \texttt{SelectionDAG}. Gore pomenuta grafovska reprezentacija programa se gradi prolaskom kroz LLVM međukod uz pomoć klase \texttt{SelectionDAGBuilder}. Za svaku instrukciju se kreira čvor na osnovu operacije koju predstavlja. Veze se kreiraju kada neki čvor
 koristi izlaznu vrednost drugog čvora. Tip te vrednosti određuje tip veze. Ovako konstruisan graf nije pogodan za spuštanje instrukcija, te se nad njim moraju izvršiti određene transformacije. 
@@ -531,7 +552,7 @@ Poslednja stvar koju je potrebno eliminisati iz LLVM međukoda su virtuelni regi
 
 Optimizacioni prolazi postoje i na MIR nivou i način njihovog izvršavanja je sličan prolazima na IR nivou odnosno na nivou mašinski nezavisnog međukoda. Međutim, optimizacije na MIR nivou su vezane za ciljnu arhitekturu. Mašinski zavisni prolazi nasleđuju klasu \texttt{MachineFunctionPass} i implementiraju funkciju \texttt{runOnMachineFunction} koja se poziva za svaku funkciju u izvornom kodu. Prolazi se izvršavaju iterativno u unapred zadatom redosledu.
 
-Poslednji prolaz na MIR kodu u kome se, u zavisnosti od navedenih opcija, emituje asemblerski ili objektni k\^od za ciljnu arhitekturu i kojim se završava zadatak kompilatora jeste \texttt{AsmPrinter}. Ukoliko je emitovan asemblerski k\^od on se prevodi do objektnog koda korišćenjem asemblera, dok se objektni kôd povezuje sa sistemskim i korisničkim bibliotekama i drugim objektnim datotekama pomoću povezivača (eng. \textit{linker}) kako bi se od njega dobila krajnja izvršiva datoteka.
+Poslednji prolaz na MIR kodu u kome se, u zavisnosti od navedenih opcija, emituje asemblerski ili objektni k\^od za ciljnu arhitekturu i kojim se završava zadatak kompilatora jeste \texttt{AsmPrinter}. Ukoliko je emitovan asemblerski k\^od on se prevodi do objektnog koda korišćenjem asemblera, dok se objektni kôd linkuje sa sistemskim i korisničkim bibliotekama i drugim objektnim datotekama pomoću povezivača ili linkera (eng. \textit{linker}) kako bi se od njega dobila krajnja izvršiva datoteka.
 
 Posao zadnjeg dela LLVM kompilatora obavlja alat \texttt{llc}. Alatu se opciono zadaje
 vrsta izlaza koju treba da generiše i nivo optimizacije. Izlaz alata \texttt{llc} može biti asemblerski ili objektni k\^od. Još jedan bitan parametar koji se alatu \texttt{llc} može proslediti je ciljna arhitektura. Ciljna arhitektura se zadaje argumentom \texttt{-mtriple} i vrednošću u vidu niske koja sadrži naziv arhitekture procesora, njegovog proizvođača, operativnog sistema i okruženja. Komanda za prevođenje LLVM međukoda do objektnog koda za
@@ -548,7 +569,8 @@ llc -filetype=obj -mtriple="x86_64-unknown-linux-gnu" input.ll -o output.o
 %U ovoj sekciji će detaljnije biti objašnjena sintaksa LLVM međurerezentacije i način na koji je ona podržana u okviru projekta LLVM. Diskusija o LLVM međureprezentaciji navedena je kako bi kasnije poglavlje koje se tiče implemetacije rešenja bilo razumljivije.
 
 %Prednji deo LLVM kompilatora je zadužen da izvorni k\^od prevede u LLVM mašinski nezavisan međukod. 
-Da bi kompilator mogao da prevodi više programskih jezika za više ciljnih arhitektura potrebno je da međukod bude na dovoljno apstraktnom nivou da ne zavisi od procesorske arhitekture, ali i na dovoljno opštem nivou kako ne bi zavisio od programskog jezika u kome je izvorni k\^od napisan. LLVM međukod je zapisan u SSA obliku što znači da poštuje svojstvo jedinstvenog statičkog dodeljivanja. Ovo svojstvo omogućava da se svakoj promenljivoj samo jednom može dodeliti vrednost i da svakoj upotrebi promenljive prethodi njena definicija. 
+Da bi kompilator mogao da prevodi više programskih jezika za više ciljnih arhitektura potrebno je da međukod bude na dovoljno apstraktnom nivou da ne zavisi od procesorske arhitekture, ali i na dovoljno opštem nivou kako ne bi zavisio od programskog jezika u kome je izvorni k\^od napisan. LLVM međukod je zapisan u SSA obliku 
+pogodnom za izvršavanje optimizacija.
 
 Datoteke koje u sebi sadrže LLVM međukod se najčešće obeležavaju ekstenzijom \texttt{.ll}. Na početku takvih datoteka se nalazi ime datoteke u kojoj je napisan izvorni kôd (npr. \texttt{test.c}), informacije o načinu zapisa podataka i naziv ciljne arhitekture. U nastavku se nalaze globalne promenljive i funkcije čiji nazivi počinju prefiksom ’@’.
 
@@ -646,7 +668,7 @@ testirati transformacije i analize sprovedene na nivou međureprezentacije, odno
 
 
 \paragraph{Čitavi programi za testiranje} se nazivaju "LLVM test suite" ili samo "test-suite" i za njih postoji repozitorijum na platformi \texttt{GitHub}. 
-Ovi testovi sadrže delove koda koji predstavljaju čitave programe i koji se mogu sastaviti i povezati u samostalan program koji se može izvršiti. Programi se obično pišu u jezicima visokog nivoa kao što su C ili C++.
+Ovi testovi sadrže delove koda koji predstavljaju čitave programe i koji se mogu sastaviti i linkovati u samostalan program koji se može izvršiti. Programi se obično pišu u jezicima visokog nivoa kao što su C ili C++.
 Programi za testiranje se prevode korišćenjem odabranih parametara kompilatora, a zatim se izvršavaju kako bi se uhvatile informacije o njegovom izlazu i vremenu izvršavanja. Izlaz programa za testiranje se poredi sa referentnim izlazom. Za više detalja pogledajte \href{https://www.llvm.org/docs/TestSuiteGuide.html}{\textit{test-suite} vodič} \cite{test_suite}.
 
 \subsection{Regresioni testovi}
@@ -684,10 +706,13 @@ FileCheck match-filename [–check-prefix=XXX] [–strict-whitespace]
 
 Sa porastom protoka podataka kroz različite mrežne kanale, greške u podacima odnosno narušavanje 
 njihovog integriteta je postalo sve učestalije. Usled unutrašnjih ili spoljašnjih 
-smetnji, podaci koji se prenose često postaju korumpirani ili oštećeni. To dovodi do gubitka 
-podataka. Jedna od najpoznatijih metoda za otkrivanje oštećenja u podacima je 
-ciklična provera redundansi (eng. \textit{Cyclic Redundancy Check - CRC}), odnosno algoritam CRC.
+smetnji, podaci koji se prenose često postaju korumpirani ili oštećeni. 
+Promene u podacima nastale usled prenosa nije moguće izbeći, ali je moguće vratiti originalnu 
+vrednost podataka. Da bi se to postiglo, potrebno je prvo korišćenjem kodova za detekciju grešaka 
+otkriti da li se promena u podacima desila. Ako je promena u podacima detektovana, moguće ju je 
+ispraviti uz pomoć kodova za korekciju grešaka. 
 
+Kodovi za detekciju grešaka se koriste za otkrivanje promena u bitova primljenih podataka. Kodovi za korekciju grešaka služe za otklanjanje promena u bitovima primljenih podataka tako što pronalaze tačan broj oštećenih bitova i njihove pozicije u bitovima podataka. Jedna od najpoznatijih metoda za detekciju grešaka u podacima je ciklična provera redundansi (eng. \textit{Cyclic Redundancy Check - CRC}), odnosno algoritam CRC.
 
 % Primene CRC algoritama...
 Primene algoritma CRC obuhvataju različite aspekte digitalne komunikacije. Na primer, u mrežnim protokolima kao što je \texttt{Ethernet} \cite{ethernet_protocol} algoritam CRC se koristi za otkrivanje grešaka prilikom prenosa podataka. U bežičnoj komunikaciji, na primer tehnologiji \texttt{Bluetooth} \cite{bluetooth}, algoritam CRC se primenjuje kako bi se osigurala tačnost i pouzdanost prenosa podataka između uređaja. Takođe, u sistemu za čuvanje podataka kao što je \texttt{RAID} (eng. \textit{Redundant Array of Independent Disks}) \cite{raid}, CRC može 
@@ -698,23 +723,25 @@ otkriti i ispraviti greške na nivou diska.
 
 Ciklična provera redundansi predstavlja tehniku koja omogućava da se putem dodatnih bitova detektuju promene u podacima. Ova tehnika se u velikoj meri koristi u digitalnim mrežama i u uređajima za skladištenje. Podaci koji ulaze u ove sisteme se proširuju dodatnim bitovima (dodatni bitovi se nadovezuju na bitove podataka). Dodatne bitove nazivamo kontrolnim bitovima (eng. \textit{checksum}) i oni se dobijaju kao ostatak pri deljenju bitova podataka sa odabranim polinomom. Deljenje se izvodi u binarnoj osnovi. Po prijemu podataka, izračunavanje se ponavlja (deljenje bitova podataka odabranim polinomom) i ukoliko se dobijena vrednost ne poklapa se očekivanom vrednošću, zaključuje se da je došlo do narušavanja integriteta podataka i mogu se pokrenuti akcije za ispravljanje oštećenih delova podataka. % Dakle, algoritam CRC se može koristiti i za korekciju podataka.
 
-Algoritam CRC se tako naziva jer su bitovi kojima se podaci proširuju redundantni (njima se podaci samo proširuju), a sam algoritam se zasniva na cikličnim kodovima \cite{cyclic_codes}. Algoritam CRC je popularan jer se može implementirati u samom hardveru, lako se matematički analizira i naročito dobro detektuje greške nastale usled šuma, a unutar transportnih kanala. % Pošto kontrolni bitovi imaju fiksiranu dužinu, funkcija koja ih generiše se obično naziva i heš funkcija.
+Algoritam CRC se tako naziva jer su bitovi kojima se podaci proširuju redundantni (njima se podaci samo proširuju), a sam algoritam se zasniva na cikličnim kodovima \cite{cyclic_codes}. Algoritam CRC je popularan jer se može implementirati u samom hardveru, lako se matematički analizira i naročito dobro detektuje greške nastale usled šuma, a unutar transportnih kanala. Precizan matematički opis i dokazi svojstava algoritma CRC mogu se pronaći u literaturi \cite{crc_attributes}.
+
+
+% Pošto kontrolni bitovi imaju fiksiranu dužinu, funkcija koja ih generiše se obično naziva i heš funkcija.
 
 %footnote[1]{Ciklični kodovi su blokovi koda (bitova) takvi da ciklično pomeranje svake ispravne kodne reči daju drugu ispravnu kodnu reč. Ciklični kodovi se koriste za korekciju grešaka zbog svojih algebarskih svojstva koja omogućavaju efikasno otkrivanje i ispravljanje grešaka.}
 
-Specifikacija CRC koda zahteva i definiciju polinoma generatora. Polinom generator postaje delilac u polinomskom deljenju, a poruka se uzima kao deljenik. Količnik pri deljenju se odbacuje, a bitovi ostatka se uzimaju kao kontrolni bitovi. Bitno je naglasiti da se koeficijenti polinoma računaju na osnovu aritmetike u konačnom polju. U praksi, sve često korišćene verzije algortima CRC koriste konačno polje sa dva elementa (odnosno Galoavu grupu GF(2)). 
+Specifikacija CRC koda zahteva i definiciju polinoma generatora. Polinom generator postaje delilac u polinomskom deljenju, a poruka se uzima kao deljenik. Količnik pri deljenju se odbacuje, a bitovi ostatka se uzimaju kao kontrolni bitovi. Bitno je naglasiti da se koeficijenti polinoma računaju na osnovu aritmetike u konačnom polju. U praksi, sve često korišćene verzije algortima CRC koriste konačno polje sa dva elementa (odnosno Galoavo polje GF(2) \cite{galois_field}). 
 %Ovo polje omogućava da se operacija sabiranja može sprovesti bitovski paralelno (bez prenosa između cifara). 
 
 % Mislim da je ovaj deo bitan i voleo bih da ga zadrzim u radu.
 Najjednostavniji metod za detekciju grešaka u podacima jeste bit parnosti, koji predstavlja kontrolni CRC bit dužine jedan. Bit parnosti koristi polinom $x+1$ (dva člana) i obično se označava kao \texttt{CRC-1}. Ovaj kontrolni bit ima vrednost jedan ukoliko je broj jedinica u bitovima podataka paran. U suprotnom, ovaj kontrolni bit ima vrednost 0. Primalac poruke proširene bitom parnosti proverava da li vrednost bita parnosti odgovara parnosti bitova poruke. Ukoliko dođe do promene u podacima koja se ne odrazi na parnost bitova, ta promena neće biti detektovana ovom metodom.
 
 Sledeći jednostavan metod za detekciju grešaka jeste izračunavanje sume bitova podataka. Bitovi sume se nadovezuju na bitove podataka (odnosno dodeljuju podacima u vidu kontrolnih bitova) i podaci se u tom obliku šalju. Primalac poruke (odnosno podatka) može po prijemu poruke izračunati njenu sumu bitova i tu vrednost uporediti sa vrednošću predstavljenom kontrolnim bitovima. Ukoliko se ove dve sume razlikuju to bi trebalo da signalizira da je usled transfera podatka 
-došlo do narušavanja njegovog integriteta. U suprotnom, ukoliko su sume identične, to 
-bi značilo da do narušavanja integriteta podataka nije došlo.
-Međutim, ukoliko su bitovi podataka promenjeni, 
+došlo do narušavanja njegovog integriteta. U slučaju da su sume identične, to bi značilo da do narušavanja integriteta podataka nije došlo.
+Međutim, ako su bitovi podataka promenjeni, 
 ali tako da je suma njihovih bitova ostala ista, upoređivanjem sume bitova poruke i 
 kontrolnih bitovima dolazi se do zaključka da se sa primljenom 
-porukom ništa nije desilo iako zapravo jeste. Takođe, ukoliko je neki od kontrolnih bitova promenjen, dolazi se do zaključka da je integritet poruke narušen iako zapravo nije. 
+porukom ništa nije desilo iako zapravo jeste. Takođe, ako je neki od kontrolnih bitova promenjen, dolazi se do zaključka da je integritet poruke narušen iako zapravo nije. Na kraju, ako su i kontrolni bitovi i bitovi podataka promenjeni tako im se sume poklapaju, dolazi se do zaključka da integritet poruke nije narušen iako zapravo jeste.
 
 Navedeni primeri govore o tome da je izbor polinoma generatora zapravo najvažniji deo implementacije algoritma CRC. Polinom mora biti izabran tako da se maksimizuju mogućnosti otkrivanja grešaka uz minimizovanje ukupnih verovatnoća kolizije. Pod kolizijom se podrazumevaju opisane situacije u kojima promena u podacima nije detektovana (a desila se) i situacije u kojima se promena signalizira iako se nije stvarno desila. Najvažniji atribut polinoma jeste njegov najveći stepen zbog njegovog direktnog uticaja na dužinu kontrolnih bitova. 
 
@@ -817,8 +844,7 @@ očekivanih i dobijenih rezultata, može se zaključiti da je algoritam prepozna
 
 Problem sa prepoznavanjem algoritma CRC jeste taj što postoji veliki broj njegovih implementacija, pa je za svaku od njih potrebno napraviti poseban šablon za prepoznavanje (eng. \textit{pattern matcher}). Pod šablonom za prepoznavanje se podrazumevaju sve provere koje se nad jednim programom vrše (prolazak kroz njegove instrukcije, provera njihovog redosleda, vrednosti njihovih operanada i druge) kako bi se ustanovilo da li on u sebi sadrži implementaciju nekog algoritma. 
 Razvijanje svakog od šablona zahteva dosta vremena i truda kako bi se napravio šablon sposoban da prepozna što veći broj modifikacija iste verzije algoritma. 
-Sa druge strane, prepoznavanje jednostavnijih algoritama ili aritmetičkih izraza (proširenog oblika kvadrata binoma, kuba binoma, izraza za računanje rešenja kvadratne jednačine) je daleko jednostavnije i zahteva pokrivanje znatno manjeg broja slučajeva
-\footnote{U okviru \texttt{GitHub} repozitorijuma koji sadrži sav materijal ovog rada nalazi se i implementacija LLVM optimizacionog prolaza pod nazivom \texttt{expression-optimizer}. Svrha tog optimizacionog prolaza jeste detektovanje proširenog oblika kvadrata binoma ($a^2 + 2ab + b^2$) i zamena istog odgovarajućim skrećenim zapisom ($(a + b)^2$).}.
+Sa druge strane, prepoznavanje jednostavnijih algoritama ili aritmetičkih izraza (proširenog oblika kvadrata binoma, kuba binoma, izraza za računanje rešenja kvadratne jednačine) je daleko jednostavnije i zahteva pokrivanje znatno manjeg broja slučajeva\footnote{U okviru \texttt{GitHub} repozitorijuma koji sadrži sav materijal ovog rada nalazi se i implementacija LLVM optimizacionog prolaza pod nazivom \texttt{expression-optimizer}. Svrha tog optimizacionog prolaza jeste detektovanje proširenog oblika kvadrata binoma ($a^2 + 2ab + b^2$) i zamena istog odgovarajućim skrećenim zapisom ($(a + b)^2$).}.
  
 
 Kako se usled porasta broja informacija koje se prosleđuju putem interneta, povećava upotreba algoritma CRC i drugih metoda za proveru integriteta podataka tako raste potreba da svaka od korišćenih metoda bude što efikasnija. Jedan od načina da se obezbedi efikasnost ovih algoritama jeste upravo uvođenje dodatnih provera u prevodiocima kojima bi se ovi algoritmi detektovali i potom optimizovali.
@@ -842,20 +868,19 @@ Softver komunicira sa hardverom korišćenjem skupa instrukcija (eng. \textit{In
 U savremenoj softverskoj industriji postoje dva pristupa razvoju skupa instrukcija za procesorke arhitekture. U pitanju su pristup zasnovan na redukovanom skupu instrukcija koji rezultuje RISC arhitekturama procesora i pristup zasnovan na kompleksnom skupu instrukcija koji rezultuje CISC arhitekturama procesora. 
 \begin{description}
     \item[RISC] 
-(eng. \textit{Reduced Instruction Set Computer}) je naziv za arhitekture čiji se skup instrukcija sastoji iz relativno malog broja instrukcija koje obavljaju 
-samo jednostavne operacije. Najčešće podržane aritmetičke i logičke instrukcije su 
+(eng. \textit{Reduced Instruction Set Computer}) je naziv za arhitekture čiji se skup instrukcija sastoji iz relativno malog broja instrukcija koje obavljaju jednostavne operacije. Najčešće podržane aritmetičke i logičke instrukcije su 
 instrukcije sabiranja i oduzimanja, instrukcije množenja, instrukcije pomeranja i bitovskih operacija. Složenije aritmetičke operacije se moraju implementirati 
 softverski svođenjem na jednostavnije. Za instrukcije ove arhitekture je karakteristično da imaju uniforman format, kao i jednostavne načine adresiranja operanada. RISC arhitekture se najčešće realizuju kao \texttt{load-store} arhitekture. To znači da se podržane instrukcije mogu podeliti u dve kategorije: one koje vrše pristup memoriji i one koje obavljaju aritmetičko-logičke operacije.
 Za pristup memoriji postoje posebne instrukcije koje podatke iz memorije upisuju u registre, kao i one koje vrednosti registara upisuju u memoriju. Sve ostale instrukcije rade isključivo sa registarskim (ili neposrednim) operandima. Tipični predstavnici RISC arhitekture su ARM \cite{arm_processor}, MIPS \cite{mips_processor} i RISC-V \cite{riscv_processor} procesori.
 \item[CISC]
 (eng. \textit{Complex Instruction Set Computer}) je naziv za arhitekture čiji skup 
-instrukcija može sadržati i instrukcije koje obavljaju prilično složene operacije poput sinusa, kosinusa, korena, logaritma i sličnih. Ove operacije zahtevaju izračunavanje u velikom broju ciklusa unutar samog procesora, svođenjem na jednostavnije koje aritmetičko-logička jedinica direktno podržava. Zbog toga je organizacija ovakvih procesora mnogo složenija. Za razliku od RISC procesora, CISC procesori podržavaju različite formate instrukcija kao i veći broj načina adresiranja operanada. To znači da se, u zavisnosti od tipa operanada, ista instrukcija može pojaviti u više oblika. Aritmetičke istrukcije CISC procesora imaju mogućnost da koriste podatke direktno iz memorije, tj. instrukcije mogu imati i registarske i memorijske operande. Tipični predstavnici CISC arhitekture su Intel procesori \cite{intel_processor}.
+instrukcija može sadržati i instrukcije koje obavljaju prilično složene operacije. Ove operacije zahtevaju izračunavanje u velikom broju ciklusa unutar samog procesora, svođenjem na jednostavnije koje aritmetičko-logička jedinica direktno podržava. Zbog toga je organizacija ovakvih procesora mnogo složenija. Za razliku od RISC procesora, CISC procesori podržavaju različite formate instrukcija kao i veći broj načina adresiranja operanada. To znači da se, u zavisnosti od tipa operanada, ista instrukcija može pojaviti u više oblika. Aritmetičke instrukcije CISC procesora imaju mogućnost da koriste podatke direktno iz memorije, tj. instrukcije mogu imati i registarske i memorijske operande. Tipični predstavnici CISC arhitekture su Intel procesori \cite{intel_processor}.
 \end{description}
 
 % RISC arhitekture zahtevaju duže programe,
-U slučaju RISC arhitektura programer je primoran da pomoću jednostavnih operacija koje procesor podržava realizuje komplikovane algoritme, što njegove programe čini dužim. Kod CISC arhitektura su, sa druge strane, programi obično kraći, jer za mnoge složene operacije postoje instrukcije koje procesor direktno podržava. Aritmetičke instrukcije CISC arhitektura mogu pored registarskih imati i memorijske operande. To omogućava da se podaci iz memorije mogu direktno koristiti. CISC arhitekture su bile veoma popularne u periodu kada je kapacitet memorija bio mali. U to vreme je postojao veliki jaz između brzine procesora i brzine memorije, pa su memorijski transferi bili skupi. Zbog toga je bilo potrebno imati što manji broj instrukcija u programu (odnosno što kraće programe) koje bi obavljale složene operacije. 
+U slučaju RISC arhitektura programer je primoran da pomoću jednostavnih operacija koje procesor podržava realizuje komplikovane algoritme, što njegove programe čini dužim. Kod CISC arhitektura su, sa druge strane, programi obično kraći, jer za mnoge složene operacije postoje instrukcije koje procesor direktno podržava. Aritmetičke instrukcije CISC arhitektura mogu pored registarskih imati i memorijske operande. To omogućava da se podaci iz memorije mogu direktno koristiti. CISC arhitekture su bile popularne u periodu kada su memorije bile malog kapaciteta. U to vreme je postojao veliki jaz između brzine procesora i brzine memorije, pa su memorijski transferi predstavljali skupe operacije. Zbog toga je bilo potrebno imati što manji broj instrukcija u programu (odnosno što kraće programe) koje bi obavljale složene operacije. 
 
-Sa razvojem tehnologije pomenuti problemi se postepeno gube, te RISC arhitekture postaju popularnije. Memorije imaju veći kapacitet, memorijski transferi postaju brži zahvaljujući efikasnim keš memorijama, a programski prevodioci napreduju u vidu optimizacije koda. Time mogućnosti hardvera više ne zaostaju za mogućnostima softvera. Takođe, moderni procesori imaju sve veći broj registara, što je neophodno u realizaciji \texttt{load-store} arhitektura odnosno RISC procesora. Jednostavnost RISC skupova instrukcija omogućava jednostavnu implementaciju procesora, a to izvršavanje instrukcija čini veoma brzim. Sa druge strane, dizajn CISC procesora je dosta kompleksniji, pa se čak i jednostavne instrukcije na njima izvršavaju sporije nego na RISC procesorima. Budući da se u programima jednostavne instrukcije daleko više koriste, efikasnost RISC arhitektura dolazi do izražaja u većini praktičnih primena.  
+Sa razvojem tehnologije pomenuti problemi se postepeno gube, te RISC arhitekture postaju popularnije. Memorije imaju veći kapacitet, memorijski transferi postaju brži zahvaljujući efikasnim keš memorijama, a programski prevodioci napreduju u vidu optimizacije koda. Time mogućnosti hardvera više ne zaostaju za mogućnostima softvera. Takođe, moderni procesori imaju veći broj registara, što je neophodno u realizaciji \texttt{load-store} arhitektura odnosno RISC procesora. Jednostavnost RISC skupova instrukcija omogućava jednostavnu implementaciju procesora, a to izvršavanje instrukcija čini brzim. Sa druge strane, dizajn CISC procesora je dosta kompleksniji, pa se čak i jednostavne instrukcije na njima izvršavaju sporije nego na RISC procesorima. Budući da se u programima jednostavne instrukcije daleko više koriste, efikasnost RISC arhitektura dolazi do izražaja u većini praktičnih primena.  
 
 % ------------------------------------------------------------------------------
 \section{Arhitektura RISC-V}
@@ -879,17 +904,17 @@ sadrži instrukcije fiksne dužine od 32 bita, a takođe podržava i 16-bitne in
 Dizajn procesora zahteva stručnost u oblasti elektronske digitalne logike, kompilatora i operativnih sistema. Da bi pokrili troškove timova koji se bave dizajnom procesora, 
 komercijalni prodavci intelektualne svojine procesora, kao što su ARM i MIPS, naplaćuju autorske naknade za korišćenje njihovih dizajna i patenata. Oni takođe često zahtevaju sporazume o neotkrivanju detalja o prednostima njihovog dizajna. U mnogim slučajevima, oni ne opisuju razloge svojih izbora u dizajnu.
 
-Projekat RISC-V je započet sa ciljem da se napravi praktičan skup instrukcija koji će biti otvorenog koda, upotrebljiv u akademske svrhe i primenljiv u bilo kom dizajnu hardvera ili softvera bez nadoknadi. Takođe, razlozi za svaku odluku o dizajnu projekta su navedeni, barem u širem smislu. Autori RISC-V su akademici koji imaju značajno iskustvo u dizajnu računarskih sistema, a skup instrukcija RISC-V je i nastao iz serije akademskih projekata na temu dizajna računara. Jednostavnost skupa instrukcija RISC-V omogućava korišćenje softvera za kontrolu istraživačkih mašina, čime se podstiče upotreba RISC-V u akademske svrhe. Skup instrukcija promenljive dužine pruža prostor za ekstenzije sa različitim primenama (za studentske vežbe, za istraživanje).
+Projekat RISC-V je započet sa ciljem da se napravi praktičan skup instrukcija koji će biti otvorenog koda, upotrebljiv u akademske svrhe i primenljiv u bilo kom dizajnu hardvera ili softvera bez nadoknadi. Takođe, razlozi za svaku odluku o dizajnu projekta su navedeni, barem u širem smislu. Autori RISC-V su akademci koji imaju značajno iskustvo u dizajnu računarskih sistema, a skup instrukcija RISC-V je i nastao iz serije akademskih projekata na temu dizajna računara. Jednostavnost skupa instrukcija RISC-V omogućava korišćenje softvera za kontrolu istraživačkih mašina, čime se podstiče upotreba RISC-V u akademske svrhe. Skup instrukcija promenljive dužine pruža prostor za proširenja sa različitim primenama (za studentske vežbe, za istraživanje).
 
 % Specificnosti RISC-V procesora i skupa instrukcija RISC-V
-Skup instrukcija RISC-V ima modularan dizajn, koji se sastoji od alternativnih osnovnih delova, sa dodatnim opcionim ekstenzijama. Osnova skupa instrukcija RISC-V i njene ekstenzije razvijeni su u zajedničkom naporu između industrije, istraživačke zajednice i obrazovnih institucija. Osnova skupa instrukcija određuje instrukcije (i njihovo kodiranje), kontrolu toka (eng. \texttt{control flow}), registre i njihove veličine, memoriju i adresiranje, kao i druge elemente. Sama osnova skupa instrukcija RISC-V dovoljna je za implementaciju pojednostavljenog računara opšte namene, sa punom softverskom podrškom (uključujući i kompilator opšte namene). Standardne ekstenzije su specifikovane tako da rade sa svim standardnim osnovama i to bez ikakvog konflikta. Mnogi RISC-V računari bi mogli da implementiraju ekstenzije sa kompresovanim instrukcijama kojima bi smanjili potrošnju energije, veličinu koda i upotrebu memorije.
+Skup instrukcija RISC-V ima modularan dizajn, koji se sastoji od alternativnih osnovnih delova, sa dodatnim opcionim proširenjima. Osnova skupa instrukcija RISC-V i njena proširenja razvijeni su u zajedničkom naporu između industrije, istraživačke zajednice i obrazovnih institucija. Osnova skupa instrukcija određuje instrukcije (i njihovo kodiranje), kontrolu toka (eng. \texttt{control flow}), registre i njihove veličine, memoriju i adresiranje, kao i druge elemente. Sama osnova skupa instrukcija RISC-V dovoljna je za implementaciju pojednostavljenog računara opšte namene, sa punom softverskom podrškom (uključujući i kompilator opšte namene). Standardna proširenja su specifikovana tako da rade sa svim standardnim osnovama i to bez ikakvog konflikta. Mnogi RISC-V računari bi mogli da implementiraju proširenja sa kompresovanim instrukcijama kojima bi smanjili potrošnju energije, veličinu koda i upotrebu memorije.
 
-% Ekstenzije za manipulaciju bitovima
-\subsection{Ekstenzije arhitekture RISC-V}
-U novembru 2021. su u skup instrukcija RISC-V uvedene sledeće ekstenzije: Zba, Zbb, Zbc, Zbs \cite{riscv_bitmanip}.
-Ekstenzije Zba, Zbb i Zbs predstavljaju proširenja standardnih instrukcija koje rade sa celim brojevima. Ekstenzija Zbb nudi instrukcije za brojanje vodećih ili završnih 0 bitova ili svih bitova koji imaju vrednost 1. Ekstenzija Zbs omogućava postavljanje, dohvatanje, brisanje i prebacivanje pojedinačnih bitova u registru prema njihovom indeksu. 
+% Proširenja za manipulaciju bitovima
+\subsection{Proširenja arhitekture RISC-V}
+U novembru 2021. su u skup instrukcija RISC-V uvedena sledeća proširenja: Zba, Zbb, Zbc, Zbs \cite{riscv_bitmanip}.
+Proširenja Zba, Zbb i Zbs predstavljaju proširenja standardnih instrukcija koje rade sa celim brojevima. Proširenje Zbb nudi instrukcije za brojanje vodećih ili završnih 0 bitova ili svih bitova koji imaju vrednost 1. Proširenje Zbs omogućava postavljanje, dohvatanje, brisanje i prebacivanje pojedinačnih bitova u registru prema njihovom indeksu. 
 
-Ekstenzija Zbc sadrži instrukcije za "množenje bez prenosa" kojim se vrši množenje binarnih polinoma u Galoavom polju GF(2). U pitanju su instrukcije \texttt{clmul}, \texttt{clmulh}, \texttt{clmulr}. %Kako će korišćenje ovih instrukcija biti predloženo u narednom poglavlju, trebalo bi ih na ovom mestu detaljnije objasniti.
+Proširenje Zbc sadrži instrukcije za "množenje bez prenosa" kojim se vrši množenje binarnih polinoma u Galoavom polju GF(2). U pitanju su instrukcije \texttt{clmul}, \texttt{clmulh}, \texttt{clmulr}. %Kako će korišćenje ovih instrukcija biti predloženo u narednom poglavlju, trebalo bi ih na ovom mestu detaljnije objasniti.
 Instrukcija \texttt{clmul} (eng. \texttt{carry-less multiplication}) izvršava operaciju množenja bez generisanja i propagiranja prenosa. Instrukcija prihvata dva celobrojna argumenta iste širine i vraća ceo broj sa dvostrukom širinom argumenata. Mehanički je ostvarena kao množenje korišćenjem višestruke ekskluzivne disjunkcije (operacije \texttt{XOR}) umesto višestrukog sabiranja (operacije \texttt{ADD}), dok matematički predstavlja množenje dva binarna polinoma. 
 Slično, instrukcija \texttt{clmulh} računa donju polovinu proizvoda bez prenosa, a
 instrukcija \texttt{clmulr} radi isto što i instrukcija \texttt{clmul} samo nad obrnutim redosledom bitova njenih argumenata (\texttt{clmul(A, B) = rev(clmul(rev(A), rev(B)))}).
@@ -980,8 +1005,8 @@ Implementacije su dodate u projekat LLVM kao optimizacioni prolaz na nivou među
 
 \begin{listing}
 \begin{minted}[breaklines, fontsize=\tiny]{llvm}
-; ModuleID = 'syrmia_crc_unoptimized.c'
-source_filename = "syrmia_crc_unoptimized.c"
+; ModuleID = 'unoptimized_crc.c'
+source_filename = "unoptimized_crc.c"
 target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128"
 target triple = "x86_64-pc-linux-gnu"
 
@@ -1042,8 +1067,8 @@ define dso_local zeroext i16 @crcu8(i8 zeroext %0, i16 zeroext %1) #0 {
 
 \begin{listing}
 \begin{minted}[breaklines, fontsize=\tiny]{llvm}
-; ModuleID = 'syrmia_crc_optimized.c'
-source_filename = "syrmia_crc_optimized.c"
+; ModuleID = 'optimized_crc.c'
+source_filename = "optimized_crc.c"
 target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128"
 target triple = "x86_64-pc-linux-gnu"
 
@@ -1131,6 +1156,13 @@ inicijalizovanih upravo tim početnim instrukcijama.
 
 Nakon uspešnog brisanja prepoznatih instrukcija, generišemo instrukcije koje pripadaju međukodu optimizovanog algoritma CRC i to radimo kreiranjem osnovnih bloka i smeštanjem odgovarajućih instrukcija unutar njih. Prepoznavanje i uklanjanje prepoznatih instrukcija su u obe implementacije izvršene kretanjem u nazad, dok je generisanje novih instrukcija izvršeno kretanjem unapred. 
 
+% Ideja prepoznavanja i optimizovanja algoritma podseća na neki od algoritama za pretragu teksta (tražimo jedan obrazac u tekstu odnosno LLVM međukodu i želimo da ga zamenimo drugim). Međutim, u okviru kompilatora LLVM tekst koji pretražujemo je u memoriji sačuvan kao 
+
+Iako ideja rešenja podseća na običnu pretragu teksta ipak postoji suštinska razlika između ova dva pristupa. 
+Tekst koji se u ovom slučaju pretražuje jeste LLVM međukod neoptimizovanog algoritma CRC. Ovaj međukod u okviru kompilatora LLVM nije vidljiv kao običan tekst nego kao skup objekata različitih klasa. Prepoznavanjem koje se u ovom radu predstavlja se zapravo proverava koji objekti referišu na koje druge objekte. Proverom referenci mi semantički zaključujemo u kom se redosledu javljaju IR instrukcije, kom osnovnom bloku pripada koja IR instrukcija, iz kog virtuelnog registra je učitan argument neke IR instrukcije i tako slično.
+
+% Mehanizam prepoznavanja dostupan u okviru kompilatora LLVM, pored toga što prepoznaje potpis neke instrukcije i redosled instrukcija on proverava i da li argumenti instrukcija dolaze iz odgovarajućih virtuelnih registara (inicijalizovanih tačno određenim instrukcijama). Takođe, korišćeni mehanizam nam daje garanciju da određene instrukcije pripadaju određenom osnovnom bloku što kod algoritama koji se bave pretragom teksta ne bi bio slučaj. Takvi algoritmi uglavnom sav sadržaj teksta smatraju ravnopravnim i nisu u stanju
+
 \section{Implementacija na IR nivou}
 
 Ova implementacija je u potpunosti sprovedena na nivou međureprezentacije. To znači da je 
@@ -1173,8 +1205,8 @@ Prvom komandom se program napisan u programskom jeziku C (sadržan u datoteci
 
 \begin{listing}[!ht]
 \begin{minted}[breaklines, fontsize=\small]{bash}
-  $ clang -O0 -Xclang -disable-O0-optnone -S -emit-llvm ../test/syrmia_crc_unoptimized.c -o syrmia_crc_unoptimized.ll
-  $ ../build/bin/opt -crc-opt -S syrmia_crc_unoptimized.ll -passes=crc-recognition -o syrmia_crc_unoptimized.ll
+  $ clang -O0 -Xclang -disable-O0-optnone -S -emit-llvm ../test/unoptimized_crc.c -o unoptimized_crc.ll
+  $ ../build/bin/opt -crc-opt -S unoptimized_crc.ll -passes=crc-recognition -o optimized_crc.ll
 \end{minted}
 \caption{Pokretanje prvog implementacionog rešenja} 
 \label{1st_solution}
@@ -1185,7 +1217,7 @@ Opcijama \texttt{-S} i \texttt{-emit-llvm} navedenim u prvoj komandi se naglaša
 U drugoj naredbi su navedene opcije \texttt{-S}, \texttt{-passes} i \texttt{-crc-opt}. Opcijom \texttt{-S} naglašavamo da je izlaznu datoteku potrebno predstaviti LLVM međureprezentacijom, a ne bajtkodom (eng. \textit{bytecode}). Opcijom \texttt{-passes} biramo optimizacioni prolaz koji želimo da pokrenemo, tj.~\texttt{crc-recognition}. Na kraju, opcija \texttt{-crc-opt} nije podrazumevana opcija za alat \textit{opt} već je to korisnički definisana opcija. Tom opcijom se u optimizacionom prolazu \texttt{crc-recognition} naglašava da je potrebno upotrebiti provere iz implementacije na IR nivou. U listingu \ref{use-option-one} možete videti način na koji je moguće uvesti novu opciju koja se kasnije može proslediti prilikom poziva LLVM optimizatoru.
 
 Rezultat implementacije na IR nivou se dobija pokretanjem LLVM optimizatora.
-Njegovim pokretanjem ulazna \texttt{.ll} datoteka (dobijena pozivom prednjeg dela LLVM nad neoptimizovanim algoritmom CRC) će biti prepravljena tako da sadrži međukod optimizovanog algoritma CRC. Pozivom alata \texttt{diff} se dobijeni međukod može uporediti sa međukodom optimizovanog algoritma CRC. 
+Njegovim pokretanjem ulazna \texttt{.ll} datoteka (dobijena pozivom prednjeg dela LLVM nad neoptimizovanim algoritmom CRC) će biti prepravljena tako da sadrži međukod optimizovanog algoritma CRC. Pozivom alata \textit{diff} se dobijeni međukod može uporediti sa međukodom optimizovanog algoritma CRC. 
 Upoređivanjem uviđamo da su međukodovi identični. To znači da se sa rezultatom implementacije na IR nivou može nastaviti proces prevođenja i da se od istog može dobiti izvršiva datoteka koja će izvršavati optimizovani algoritam CRC.
 
 %Ukoliko se sadržaj te datoteke pozivom alata \texttt{diff} uporedi sa datotekom koja sadrži međukod optimizovanog CRC algoritma dobija se da je izgenerisani IR program identičan referentnom IR programu što je i bio cilj optimizacionog prolaza.
@@ -1245,9 +1277,9 @@ Za pokretanje implementacije pomoću intrinzičkih funkcija potrebno je pored al
 
 \begin{listing}[!ht]
 \begin{minted}[breaklines, fontsize=\small]{bash}
-  $ clang -O0 -Xclang -disable-O0-optnone -S -emit-llvm -target riscv64-unknown-linux-gnu -march=rv64izbc ../test/syrmia_crc_unoptimized.c -o syrmia_crc_unoptimized.ll
-  $ ../build/bin/opt -crc-opt-intrinsic -S syrmia_crc_unoptimized.ll -passes=crc-recognition -o syrmia_crc_unoptimized.ll
-  $ ../build/bin/llc syrmia_crc_unoptimized.ll -print-after-all -debug -o - &> out.txt
+  $ clang -O0 -Xclang -disable-O0-optnone -S -emit-llvm -target riscv64-unknown-linux-gnu -march=rv64izbc ../test/unoptimized_crc.c -o unoptimized_crc.ll
+  $ ../build/bin/opt -crc-opt-intrinsic -S unoptimized_crc.ll -passes=crc-recognition -o unoptimized_crc.ll
+  $ ../build/bin/llc unoptimized_crc.ll -print-after-all -debug -o - &> out.txt
 \end{minted}
 \caption{Pokretanje implementacionog rešenja zasnovanog na intrinzičkim funkcijama}
 \label{2nd_solution}
@@ -1272,7 +1304,7 @@ Dobijeni asemblerski k\^od je identičan asemblerskom kodu navedenom u članku k
    srli    a0, a0, GET_MODE_BITSIZE (word_mode) - crc_size
    ret
 \end{minted}
-\caption{Asemblerski k\^od optimizovanog algoritma CRC predložen u artiklu korišćenom kao resurs}
+\caption{Asemblerski k\^od optimizovanog algoritma CRC predložen u članku \cite{patch_about_crc_support} korišćenom kao resurs}
 \label{riscv_machine_code}
 \centering
 \end{listing}
@@ -1312,7 +1344,7 @@ Testom se proverava da li je asemblerski k\^od generisan od strane alata \textit
 
 \begin{listing}[!ht]
 \begin{minted}[breaklines, fontsize=\small]{c++}
-; RUN: ../build/bin/llc syrmia_crc_unoptimized.ll -print-after-all -debug %s 2>&1 | FileCheck %s
+; RUN: ../build/bin/llc unoptimized_crc.ll -print-after-all -debug %s 2>&1 | FileCheck %s
 
 ; CHECK: crcu8: 
 crcu8:  
@@ -1364,16 +1396,22 @@ Program \texttt{optimized\_crc.c} iščitava sadržaj datoteke \texttt{inputs.tx
 
 Program \texttt{optimized\_crc.c} se prevodi korišćenjem kompilatora Clang. Program \texttt{unoptimized\_crc.c} se prevodi na dva načina. Prvi put pomoću kompilatora Clang, a drugi put komandama za pokretanje optimizacije na IR nivou i nakon toga kompilatorom Clang. Drugi način prevođenja programa \texttt{unoptimized\_crc.c} omogućava kreiranje izvršive datoteke na osnovu međukoda dobijenog pokretanjem implementacije na IR nivou (nad neoptimizovanim algoritmom CRC).
 
-Pokretanjem svih izvršivih datoteka (dobijenih iz odgovarajućih prevođenja) nastaju tri različite tekstualne datoteke imenovane prema prosleđenim argumentima komandne linije. Datoteke sadrže rezultate odgovarajućih verzija algoritma CRC pokrenutih nad istim argumentima. Korišćenjem alata \texttt{diff} za upoređivanje sadržaja svakog para datoteka dobija se da su im sadržaji identični. Time se zaključuje da su korišćene verzije algoritma CRC funkcionalno ekvivalentne, a takođe se zaključuje i da se pokretanjem implementacije na IR nivou nad neoptimizovanom verzijom algoritma zadržava funkcionalna ekvivalentnost.
+Pokretanjem svih izvršivih datoteka (dobijenih iz odgovarajućih prevođenja) nastaju tri različite tekstualne datoteke imenovane prema prosleđenim argumentima komandne linije. Datoteke sadrže rezultate odgovarajućih verzija algoritma CRC pokrenutih nad istim argumentima. Korišćenjem alata \textit{diff} za upoređivanje sadržaja svakog para datoteka dobija se da su im sadržaji identični. Time se zaključuje da su korišćene verzije algoritma CRC funkcionalno ekvivalentne, a takođe se zaključuje i da se pokretanjem implementacije na IR nivou nad neoptimizovanom verzijom algoritma zadržava funkcionalna ekvivalentnost.
 
 % -------------------------------------
 % Provera funkcionalne ispravnosti implementacije je izvršena testom prikazanim u listingu \ref{testing_threads}. Na početku testa se generišu nasumični ulazi i smeštaju u globalnu promenljivu predstavljenu tipom vektora parova. Veličina vektora odnosno veličina ulaza koja se testom proverava je zadata prvim argumentom komande linije. Nakon generisanja ulaza, pokreću se dve niti koje prolaze kroz vektor generisanih ulaza i za svaki ulaz pozivaju odgovarajuću verziju algoritma CRC. Prva nit poziva neoptimizovanu verziju, dok druga nit poziva optimizovanu verziju algoritma. Rezultati dobijeni pozivom ovih funckija se smeštaju u različite promenljive predstavljene tipom \texttt{vektor}. Funkcija \texttt{main()} čeka da obe niti završe sa svojim radom i kada do toga dođe prolazi kroz vektore u kojima su pokrenute niti sačuvale povratne vrednosti funkcija koje su pozivale. Prolaskom kroz vektore se provera da li su obe verzije algoritma CRC za svaki par ulaza imale istu povratnu vrednost. 
 % -------------------------------------
 
-Postupak testiranja mašinskog koda za arhitekturu RISC-V (dobijenog pokretanjem implementacije pomoću intrinzičkih funckija) potrebno je sprovesti ili na odgovarajućem procesoru ili na nekom od emulatora\footnote{Primer emulatora je QEMU \cite{qemu}. QEMU omogućava izvršavanje jednog operativnog sistema i programa jedne mašine na drugoj mašini. Često se koristi za virtuelizaciju izvršavanja programa na udaljenoj mašini sa drugačijim specifikacijama u odnosu na mašinu na kojoj je emulator pokrenut.}. Opisana implementacija nažalost nije dala željene rezultate. Njenim pokretanjem ustanovljeno je da generisani asemblerski k\^od nije funkcionalno ekvivalentan početnom algoritmu CRC\footnote{Možda je to i razlog zašto implementacija opisana u članku koji je služio kao osnova za implementaciju nije integrisana u projekat GCC.}.  U skladu sa time, evaluacija efikasnosti rešenja rađena je samo za implementaciju na IR nivou. 
+Postupak testiranja mašinskog koda za arhitekturu RISC-V (dobijenog pokretanjem implementacije pomoću intrinzičkih funckija) potrebno je sprovesti ili na odgovarajućem procesoru ili na nekom od emulatora\footnote{Primer emulatora je QEMU \cite{qemu}. QEMU omogućava izvršavanje jednog operativnog sistema i programa jedne mašine na drugoj mašini. Često se koristi za virtuelizaciju izvršavanja programa na udaljenoj mašini sa drugačijim specifikacijama u odnosu na mašinu na kojoj je emulator pokrenut.}. Opisana implementacija nažalost nije dala željene rezultate. Njenim pokretanjem na emulatoru ustanovljeno je da generisani asemblerski k\^od nije funkcionalno ekvivalentan početnom algoritmu CRC. 
+
+Jedan od mogućih razloga neekvivalentnosti jeste implementacija \texttt{clmul} instrukcije koja verovatno ne odgovara načinu množenja polinoma u korišćenim implementacijama algoritama CRC. U trenutnoj fazi rada se prepoznaje jedna fiksirana implementacija neoptimizovanog algoritma CRC i ona se zamenjuje jednom fiksiranom implementacijom optimizovanog algoritma CRC. U daljem radu će se adresirati problem preciznosti prepoznavanja i na tome će se dodatno raditi.
+U skladu sa navedenim, evaluacija efikasnosti rešenja rađena je samo za implementaciju na IR nivou.
+%\footnote{Možda je to i razlog zašto implementacija opisana u članku koji je služio kao osnova za implementaciju nije integrisana u projekat GCC.}
 
 %Kreirani test je prikazan u listingu \ref{testing_threads}. Svrha testa je da proveri semantičku ekvivalentnost optimizovane i neoptimizovane verzije CRC algoritma. 
 % Prva dva pokretanje testa \texttt{testing\_crc.cpp} su pokrenuta nad ulazom veličine sto miliona. Na osnovu slike \ref{results} može se videti da optimizovani CRC algoritam završava sa radom prvo jednu, a zatim dve sekunde ranije u odnosu na neoptimizovani CRC algoritam. U poslednjem izvršavanju se može videti drastična razlika između ova dva algoritma koja u tom slučaju iznosi čas šesnaest sekundi.
+
+Pored evaluacije efikasnosti, implementacija na IR nivou je pokrenuta i nad datotekama iz direktorijuma \texttt{tests} (koji se takođe nalazi unutar repozitorijuma u kome je sadržan sav materijal ovog rada). Svaka od datoteka u direktorijumu \texttt{tests} predstavlja jednostavan program napisan u programskom jeziku C koji sadrži definicije više funkcija. U svakom od programa se među definicijama funckija nalazi i definicija neoptimizovane verzije algoritma CRC. Pokretanjem implementacije na IR nivou nad svakim programom iz direktorijuma \texttt{tests} dolazi do uspešnog prepoznavanja neoptimizovane verzije algoritma CRC na IR nivou i njegove zamene optimizovanim međukodom. 
 
 % \begin{listing}
 % \begin{minted}[breaklines, fontsize=\small]{C++}
@@ -1427,7 +1465,7 @@ Postupak testiranja mašinskog koda za arhitekturu RISC-V (dobijenog pokretanjem
 Eksperimentalna evaluacija efikasnosti optimizacije je urađena na Dell računaru 15. generacije sa 16 gigabajta radne memorije, procesorom Intel Core i7 13. generacije i operativnim sistemom Ubuntu 22.04.4. 
 Ovaj postupak je, kao i provera funkcionalne ispravnosti, izvršen za neoptimizovanu i optimizovanu verziju algoritma CRC koje su prevedene kompilatorom Clang, kao i za neoptimizovanu verziju algoritma CRC nad kojom je pokrenuta implementacija na IR nivou, a zatim nastavljeno prevođenje pomoću kompilatora Clang. Programi korišćeni za poređenje vremena izvršavanja nalaze se unutar direktorijuma \texttt{implementation/time\_measurement} u okviru \texttt{GitHub} repozitorijuma koji sadrži sav materijal rada. 
 
-Postupak poređenja je izvršen kroz 4 serije od ukupno 5 ponavljanja. U serijama se redom porede vremena izvršavanje nad ulazima veličine 100 000, 1 000 000, 10 000 000 i 100 000 000. U svakom ponavljanju u okviru iste serije se generišu nasumični ulazi i smeštaju u datoteku tako da se u svakoj liniji nalazi jedan ulaz. Broj linija u datoteci odgovara veličini ulaza za tu seriju. Nakon generisanja ulaza odgovarajuća verzija algoritma se prevodi jednim od opisanih načina prevođenja, a zatim pokreće nad svakim izgnerisanim ulazom (svakom linijom u datoteci). Ukupno vreme izvršavanja predstavlja vreme potrebno da se odgovarajuća verzija algoritma izvrši za svaki izgenerisani ulaz. Rezultati dobijeni izvođenjem serija prikazani su u tebelama \ref{table_100k}, \ref{table_1m}, \ref{table_10m} i \ref{table_100m}.
+Postupak poređenja je izvršen kroz 4 serije od ukupno 5 ponavljanja. U serijama se redom porede vremena izvršavanja nad ulazima veličine 100 000, 1 000 000, 10 000 000 i 100 000 000. Veličina ulaza odnosi se na dužinu niza u kome su smešteni parovi argumenata zajednički za obe verzije algoritma CRC. U svakom ponavljanju u okviru iste serije se generišu nasumični ulazi i smeštaju u datoteku tako da se u svakoj liniji nalazi jedan ulaz. Broj linija u datoteci odgovara veličini ulaza za tu seriju. Nakon generisanja ulaza odgovarajuća verzija algoritma se prevodi jednim od opisanih načina prevođenja, a zatim pokreće nad svakim izgnerisanim ulazom (svakom linijom u datoteci). Ukupno vreme izvršavanja predstavlja vreme potrebno da se odgovarajuća verzija algoritma izvrši za svaki izgenerisani ulaz. Rezultati dobijeni izvođenjem serija prikazani su u tebelama \ref{table_100k}, \ref{table_1m}, \ref{table_10m} i \ref{table_100m}.
 
 % Optimizovana verzija algoritma CRC prevodi se kompilatorom Clang. Neoptimizovana verzija algoritma CRC se takođe prevodi kompilatorom Clang, ali i pokretanjem implementacije na IR nivou i pozivom kompilatora Clang nakon pokretanja implementacije. 
 
@@ -1438,14 +1476,11 @@ U tabelama je prikazan prosečan broj milisekundi potreban za izvršavanje svake
 
 Rezultati pokazuju da je optimizovana verzija algoritma CRC u proseku za 34.6\% vremenski efikasnija u odnosu na neoptimizovanu verziju algoritma. Takođe, pokretanjem optimizacije na IR nivou (nad neoptimizovanom verzijom algoritma CRC) se u proseku postiže gotovo isto poboljšanje od 35.1\%. Na grafiku se može videti kako se rezultati prikazani u kolonama \texttt{"optimized\_crc.c"} i \texttt{"unoptimized\_crc.c + optimizacija"} poklapaju. Ovakav rezultat je i očekivan budući da je međukod optimizovanog algoritma CRC korišćen u okviru implementacije optimizacije na IR nivou.
 
-%Razlika u vremenu izvršavanja je u nekim slučajevima (kao što se može vidite u tabeli
-
 % Iako se očekivalo da će vremena izvršavanja optimizovane verzije algoritma CRC i pokretanja implementacije na IR nivou biti vrlo slična, testiranjem se ispostavilo da je pokretanje implementacije efikasnije. Ovime možemo zaključiti da kompilator LLVM u određenim slučajevima proizvodi efikasniji (kvalitetniji) izvršivi k\^od u odnosu na kompilator GCC.  
-
-% Rezultati pokazuju da je optimizovana verzija algoritma CRC daleko efikasnija. Razlika u vremenu izvršavanja je u nekim slučajevima (kao što se može vidite u tabeli \ref{table_bilion}) čak 16 sekundi u korist optimizovane verzije algoritma CRC. 
  
 
-\begin{figure}[!ht]
+% \begin{figure}
+\begin{table}[!ht]
 \begin{center}
 \begin{tabular}{ | m{5.5cm} | m{2.7cm}| m{2.5cm} | m{2.7cm} | }
       \hline
@@ -1469,9 +1504,10 @@ Rezultati pokazuju da je optimizovana verzija algoritma CRC u proseku za 34.6\% 
 \end{center}
 \caption{Poređenje vremena izvršavanja obe verzije algoritma CRC nad ulazom veličine 100 000}
 \label{table_100k}
-\end{figure}
+\end{table}
+% \end{figure}
 
-\begin{figure}[!ht]
+\begin{table}[!ht]
 \begin{center}
 \begin{tabular}{ | m{5.5cm} | m{2.5cm}| m{2.5cm} | m{2.5cm} |  }
       \hline
@@ -1495,9 +1531,9 @@ Rezultati pokazuju da je optimizovana verzija algoritma CRC u proseku za 34.6\% 
 \end{center}
 \caption{Poređenje vremena izvršavanja obe verzije algoritma CRC nad ulazom veličine 1 000 000}
 \label{table_1m}
-\end{figure}
+\end{table}
 
-\begin{figure}[!ht]
+\begin{table}[!ht]
 \begin{center}
 \begin{tabular}{| m{5.5cm} | m{2.5cm}| m{2.5cm} | m{2.5cm} | }
       \hline
@@ -1521,9 +1557,9 @@ Rezultati pokazuju da je optimizovana verzija algoritma CRC u proseku za 34.6\% 
 \end{center}
 \caption{Poređenje vremena izvršavanja obe verzije algoritma CRC nad ulazom veličine 10 000 000}
 \label{table_10m}
-\end{figure}
+\end{table}
 
-\begin{figure}[!ht]
+\begin{table}[!ht]
 \begin{center}
 \begin{tabular}{| m{5.5cm} | m{2.5cm}| m{2.5cm} | m{2.5cm} | }
       \hline
@@ -1547,7 +1583,7 @@ Rezultati pokazuju da je optimizovana verzija algoritma CRC u proseku za 34.6\% 
 \end{center}
 \caption{Poređenje vremena izvršavanja obe verzije algoritma CRC nad ulazom veličine 100 000 000}
 \label{table_100m}
-\end{figure}
+\end{table}
 
 
 \begin{figure}[!ht]
@@ -1578,14 +1614,17 @@ Rezultati pokazuju da je optimizovana verzija algoritma CRC u proseku za 34.6\% 
 \addplot[
     color=red,
     mark=square,
+    style={ultra thick}
     ]
     coordinates {
-    (100000, 15.2) (1000000, 141.6)(10000000, 815.2) (100000000, 7953.2)
+%    (100000, 15.2) (1000000, 141.6)(10000000, 815.2) (100000000, 7953.2)
+    (100000, 14.7) (1000000, 137.6)(10000000, 800.2) (100000000, 8100.2)
     };
     
 \addplot[
     color=green,
     mark=square,
+    style={very thick}
     ]
     coordinates {
     (100000, 15.2) (1000000, 141.8)(10000000, 810.8) (100000000, 7734.6)
@@ -1606,10 +1645,10 @@ Rezultati pokazuju da je optimizovana verzija algoritma CRC u proseku za 34.6\% 
 Cilj ovog rada je da predstavi jedan pravac unapređenja kompilatorske infrastrukture LLVM i da precizno opiše način na koji je takva unapređenja moguće integrisati u projekat LLVM. Kao ilustracija ove vrste unapređenja odabran je problem detekcije i optimizacije algoritma CRC zbog važnosti i sve učestalije primene ovog algoritma. 
 
 %Nastaviti
-Glavni predmet rada je uvođenje novog optimizacionog prolaza u okviru projekta LLVM koji na nivou LLVM međureprezentacije detektuje određenu sekvencu IR instrukcija i zamenjuje je drugom. U radu su predstavljene dve mogućnosti, prva koja sekvencu IR instrukcija zamenjuje drugom sekvencom IR istrukcija i druga koja sekvencu IR isntrukcija zamenjuje pozivom intrinzičke funkcije. Oba rešenja sadržana su u kreiranom optimizacionom prolazu. Ideja predloženih rešenja može biti iskorišćena za prepoznavanje i optimizovanje drugih verzija algoritma CRC kao i potpuno drugih algoritama i aritmetičkih izraza. 
+Glavni predmet rada je uvođenje novog optimizacionog prolaza u okviru projekta LLVM koji na nivou LLVM međureprezentacije detektuje određenu sekvencu IR instrukcija i zamenjuje je drugom. U radu su predstavljene dve mogućnosti, prva koja sekvencu IR instrukcija zamenjuje drugom sekvencom IR instrukcija i druga koja sekvencu IR instrukcija zamenjuje pozivom intrinzičke funkcije. Oba rešenja sadržana su u kreiranom optimizacionom prolazu. Ideja predloženih rešenja može biti iskorišćena za prepoznavanje i optimizovanje drugih verzija algoritma CRC kao i potpuno drugih algoritama i aritmetičkih izraza. 
 
 % Nastaviti
-Doprinos ove teze se jeste predstavljanje metoda za prepoznavanje nekog algoritma korišćenjem kompilatora LLVM. Svrha prepoznavanja i optimizovanja nekog algoritma jeste da se poveća efikasnost programa dobijenog na samom kraju prevođenja. Efikasnost se odnosi na smanjenje vremena izvršavanja i smanjenje memorijskog zauzeća programa. Pokretanjem implementacije na IR nivou postiže se smanjenje vremena izvršavanja neoptimizovanog algoritma CRC za čak 37\%. 
+Doprinos ove teze jeste predstavljanje metoda za prepoznavanje nekog algoritma korišćenjem kompilatora LLVM. Svrha prepoznavanja i optimizovanja nekog algoritma jeste da se poveća efikasnost programa dobijenog na samom kraju prevođenja. Efikasnost se odnosi na smanjenje vremena izvršavanja i smanjenje memorijskog zauzeća programa. Pokretanjem implementacije na IR nivou postiže se smanjenje vremena izvršavanja neoptimizovanog algoritma CRC za čak 37\%. 
 
 %Nastaviti...
 % Potencijalna unapređenja predstavljenih rešenja...
